@@ -131,8 +131,37 @@ def main():
                     outFile.write(',NA,NA,NA')
 
                 outFile.write('\n')
+    outFile.close()
 
 
+def filter_file():
+    file = open('scoresExtractedData.csv', 'r')
+    outFile = open('scoresExtractedFiltered.csv', 'w')
+    for line in file.readlines():
+        if line.find('NA') < 0:
+            outFile.write(line)
+
+def split_file():
+    file = open('scoresExtractedFiltered.csv', 'r')
+    golFile = open('scoresGol.csv', 'w')
+    zagFile = open('scoresZag.csv', 'w')
+    latFile = open('scoresLat.csv', 'w')
+    meiFile = open('scoresMei.csv', 'w')
+    ataFile = open('scoresAta.csv', 'w')
+
+    for line in file.readlines():
+        if line.find('gol') >= 0:
+            golFile.write(line)
+        elif line.find('zag') >= 0:
+            zagFile.write(line)
+        elif line.find('lat') >= 0:
+            latFile.write(line)
+        elif line.find('mei') >= 0:
+            meiFile.write('mei')
+        elif line.find('ata') >= 0:
+            ataFile.write(line)
 
 if __name__ == '__main__':
     main()
+    filter_file()
+    split_file()
