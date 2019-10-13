@@ -28,7 +28,7 @@ SG = 28
 
 
 ROUNDS = 38
-ATTRIBUTES = 17
+ATTRIBUTES = 18
 DECAY = 0.5
 
 
@@ -80,6 +80,7 @@ def build_log():
             log[playerID][year][roundNum].append(float(line[RB]))
             log[playerID][year][roundNum].append(float(line[SG]))
 
+            log[playerID][year][roundNum].append(float(line[21]))
             log[playerID][year][roundNum].append(line[23])
             log[playerID][year][roundNum].append(float(line[24]))
 
@@ -116,7 +117,7 @@ def main():
 
     outFile = open('scoresExtractedData.csv', 'w')
 
-    outFile.write('PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,pos,price\n')
+    outFile.write('PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,realScore\n')
 
     for player in scores:
         for year in log[player]:
@@ -124,10 +125,15 @@ def main():
                 outFile.write(str(player) + ',' + str(year) + ',' + str(roundNum))
                 for item in scores[player][year][roundNum]:
                     outFile.write(',' + '{:.2f}'.format(item))
-                if log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0 :
+                if log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0:
                     outFile.write(',' + str(log[player][year][roundNum][-2]) + ',' + str(log[player][year][roundNum][-1]))
                 else:
                     outFile.write(',NA,NA')
+
+                if log[player][year].get(roundNum+1) is not None and len(log[player][year][roundNum+1]) > 0:
+                    outFile.write(',' + str(log[player][year][roundNum+1][-3]))
+                else:
+                    outFile.write(',NA')
 
                 outFile.write('\n')
 
