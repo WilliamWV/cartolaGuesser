@@ -125,17 +125,13 @@ def main():
                 outFile.write(str(player) + ',' + str(year) + ',' + str(roundNum))
                 for item in scores[player][year][roundNum]:
                     outFile.write(',' + '{:.2f}'.format(item))
-                if log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0:
-                    outFile.write(',' + str(log[player][year][roundNum][-2]) + ',' + str(log[player][year][roundNum][-1]))
-                else:
-                    outFile.write(',NA,NA')
-
                 if log[player][year].get(roundNum+1) is not None and len(log[player][year][roundNum+1]) > 0:
-                    outFile.write(',' + str(log[player][year][roundNum+1][-3]))
+                    outFile.write(',' + str(log[player][year][roundNum+1][-2]) + ',' + str(log[player][year][roundNum+1][-1]) + ',' + str(log[player][year][roundNum+1][-3]))
                 else:
-                    outFile.write(',NA')
+                    outFile.write(',NA,NA,NA')
 
                 outFile.write('\n')
+
 
 
 if __name__ == '__main__':
