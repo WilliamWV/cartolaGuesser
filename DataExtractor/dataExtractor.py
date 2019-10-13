@@ -27,60 +27,110 @@ RB = 26
 SG = 28
 
 
-outFile = open('extractedData.csv', 'w')
+ROUNDS = 38
+ATTRIBUTES = 17
+DECAY = 0.5
 
 
 file = open(args.file, 'r', encoding='utf-8')
 headers = file.readline().replace('\"', '').split(',')
 
 log = {}
+scores = {}
 
-lines = [line.split(',') for line in file.readlines()]
-for line in lines:
+def build_log():
 
-    playerID = line[2]
-    year = line[30]
-    roundNum = line[27]
-    playedThisRound = line[20]
+    lines = [line.split(',') for line in file.readlines()]
+    for line in lines:
 
-    if log.get(playerID) is None:
-        log[playerID] = {}
-    if log[playerID].get(year) is None:
-        log[playerID][year] = {}
-    if log[playerID][year].get(roundNum) is None:
-        log[playerID][year][roundNum] = []
+        playerID = line[2]
+        year = line[30]
+        roundNum = int(line[27])
+        playedThisRound = line[20]
 
-    if playedThisRound:
-        log[playerID][year][roundNum].append(line[A])
-        log[playerID][year][roundNum].append(line[CA])
-        log[playerID][year][roundNum].append(line[CV])
-        log[playerID][year][roundNum].append(line[DD])
-        log[playerID][year][roundNum].append(line[DP])
-        log[playerID][year][roundNum].append(line[FC])
-        log[playerID][year][roundNum].append(line[FD])
-        log[playerID][year][roundNum].append(line[FF])
-        log[playerID][year][roundNum].append(line[FS])
-        log[playerID][year][roundNum].append(line[FT])
-        log[playerID][year][roundNum].append(line[G])
-        log[playerID][year][roundNum].append(line[GC])
-        log[playerID][year][roundNum].append(line[GS])
-        log[playerID][year][roundNum].append(line[I])
-        log[playerID][year][roundNum].append(line[PE])
-        log[playerID][year][roundNum].append(line[PP])
-        log[playerID][year][roundNum].append(line[RB])
-        log[playerID][year][roundNum].append(line[SG])
+        if log.get(playerID) is None:
+            log[playerID] = {}
+        if log[playerID].get(year) is None:
+            log[playerID][year] = {}
+        if log[playerID][year].get(roundNum) is None:
+            log[playerID][year][roundNum] = []
 
-        log[playerID][year][roundNum].append(line[23])
-        log[playerID][year][roundNum].append(line[24])
+        if playedThisRound:
+            log[playerID][year][roundNum].append(float(line[A]))
+            log[playerID][year][roundNum].append(float(line[CA]))
+            log[playerID][year][roundNum].append(float(line[CV]))
 
-outFile.write('PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,pos,price\n')
+            log[playerID][year][roundNum].append(float(line[DD]))
+            log[playerID][year][roundNum].append(float(line[DP]))
+            log[playerID][year][roundNum].append(float(line[FC]))
 
-for player in log:
-    for year in log[player]:
-        for roundNum in log[player][year]:
-            outFile.write(str(player) + ',' + str(year) + ',' + str(roundNum))
-            if len(log[player][year][roundNum]) > 0:
-                for i in range(len(log[player][year][roundNum])):
-                    outFile.write(',' + str(log[player][year][roundNum][i]))
+            log[playerID][year][roundNum].append(float(line[FD]))
+            log[playerID][year][roundNum].append(float(line[FF]))
+            log[playerID][year][roundNum].append(float(line[FS]))
 
-            outFile.write('\n')
+            log[playerID][year][roundNum].append(float(line[FT]))
+            log[playerID][year][roundNum].append(float(line[G]))
+            log[playerID][year][roundNum].append(float(line[GC]))
+
+            log[playerID][year][roundNum].append(float(line[GS]))
+            log[playerID][year][roundNum].append(float(line[I]))
+            log[playerID][year][roundNum].append(float(line[PE]))
+
+            log[playerID][year][roundNum].append(float(line[PP]))
+            log[playerID][year][roundNum].append(float(line[RB]))
+            log[playerID][year][roundNum].append(float(line[SG]))
+
+            log[playerID][year][roundNum].append(line[23])
+            log[playerID][year][roundNum].append(float(line[24]))
+
+
+def build_line(player, year, currRound):
+
+
+    if scores.get(player) is None:
+        scores[player] = {}
+    if scores[player].get(year) is None:
+        scores[player][year] = {}
+        scores[player][year][0] = [0] * ATTRIBUTES
+
+    scores[player][year][currRound] = [0] * ATTRIBUTES
+
+    for i in range(ATTRIBUTES):
+        if log[player][year].get(currRound) is not None and len(log[player][year][currRound]) > 0:
+            scores[player][year][currRound][i] = scores[player][year][currRound - 1][i] * DECAY + log[player][year][currRound][i]
+        else:
+            scores[player][year][currRound][i] = scores[player][year][currRound - 1][i] * DECAY
+
+
+def main():
+
+    build_log()
+
+    for player in log:
+        years_played = list(log[player].keys())
+        years_played.sort()
+        player_scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for year in years_played:
+            for roundNum in range(1, ROUNDS):
+                build_line(player, year, roundNum)
+
+    outFile = open('scoresExtractedData.csv', 'w')
+
+    outFile.write('PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,pos,price\n')
+
+    for player in scores:
+        for year in log[player]:
+            for roundNum in range(ROUNDS):
+                outFile.write(str(player) + ',' + str(year) + ',' + str(roundNum))
+                for item in scores[player][year][roundNum]:
+                    outFile.write(',' + '{:.2f}'.format(item))
+                if log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0 :
+                    outFile.write(',' + str(log[player][year][roundNum][-2]) + ',' + str(log[player][year][roundNum][-1]))
+                else:
+                    outFile.write(',NA,NA')
+
+                outFile.write('\n')
+
+
+if __name__ == '__main__':
+    main()
