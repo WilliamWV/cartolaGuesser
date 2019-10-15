@@ -172,6 +172,8 @@ def filter_file():
     for line in in_file.readlines():
         if line.find('NA') < 0:
             out_file.write(line)
+    in_file.close()
+    out_file.close()
 
 
 def split_file():
@@ -201,6 +203,14 @@ def split_file():
             ata_file.write(line)
 
 
+def write_train_file(in_file_path):
+    in_file = open(in_file_path, 'r')
+    out_file = open('train/' + in_file_path.replace('.csv', '') + '_train.csv', 'w')
+    for line in in_file.readlines():
+        third_comma_pos = line.find(',', line.find(',', line.find(',')+1)+1)
+        out_file.write(line[third_comma_pos+1:])
+
+
 if __name__ == '__main__':
     build_log()
     process_team_logs()
@@ -208,3 +218,5 @@ if __name__ == '__main__':
     write_data_to_file()
     filter_file()
     split_file()
+    for ans_file in ['scoresGol.csv', 'scoresZag.csv', 'scoresLat.csv', 'scoresMei.csv', 'scoresAta.csv']:
+        write_train_file(ans_file)
