@@ -142,7 +142,7 @@ def write_data_to_file():
     out_file = open('scoresExtractedData.csv', 'w')
 
     out_file.write(
-        'PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,team,proGoals,'
+        'PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
         'consGoals,realScore\n'
     )
 
@@ -156,11 +156,11 @@ def write_data_to_file():
                     team = log[player][year][roundNum + 1][-4]
                     out_file.write(',' + str(log[player][year][roundNum + 1][-2]) + ',' + str(
                         log[player][year][roundNum + 1][-1]) +
-                                   ',' + str(team) + ',' + str(teams[team][year][roundNum]['acc_goals']) + ',' +
+                                   ',' + str(teams[team][year][roundNum]['acc_goals']) + ',' +
                                    str(teams[team][year][roundNum]['tak_goals']) + ',' +
                                    str(log[player][year][roundNum + 1][-3]))
                 else:
-                    out_file.write(',NA,NA,NA,NA,NA,NA')
+                    out_file.write(',NA,NA,NA,NA,NA')
 
                 out_file.write('\n')
     out_file.close()
@@ -181,6 +181,12 @@ def split_file():
     lat_file = open('scoresLat.csv', 'w')
     mei_file = open('scoresMei.csv', 'w')
     ata_file = open('scoresAta.csv', 'w')
+
+    for out_file in [gol_file, zag_file, lat_file, mei_file, ata_file]:
+        out_file.write(
+            'PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
+            'consGoals,realScore\n'
+        )
 
     for line in in_file.readlines():
         if line.find('gol') >= 0:
