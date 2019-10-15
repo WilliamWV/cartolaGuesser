@@ -156,8 +156,8 @@ def write_data_to_file():
                     team = log[player][year][roundNum + 1][-4]
                     out_file.write(',' + str(log[player][year][roundNum + 1][-2]) + ',' + str(
                         log[player][year][roundNum + 1][-1]) +
-                                   ',' + str(teams[team][year][roundNum]['acc_goals']) + ',' +
-                                   str(teams[team][year][roundNum]['tak_goals']) + ',' +
+                                   ',' + '{:.2f}'.format(teams[team][year][roundNum]['acc_goals']) + ',' +
+                                   '{:.2f}'.format(teams[team][year][roundNum]['tak_goals']) + ',' +
                                    str(log[player][year][roundNum + 1][-3]))
                 else:
                     out_file.write(',NA,NA,NA,NA,NA')
