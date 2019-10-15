@@ -108,9 +108,7 @@ def build_line(player, year, curr_round):
             scores[player][year][curr_round][i] = scores[player][year][curr_round - 1][i] * DECAY
 
 
-def main():
-    build_log()
-
+def process_team_logs():
     for team in teams:
         for year in teams[team]:
             if teams[team][year].get(0) is None:
@@ -130,6 +128,8 @@ def main():
                     DECAY * teams[team][year][roundNum - 1]['tak_goals'] + \
                     teams[team][year][roundNum]['goals_taken']
 
+
+def process_player_logs():
     for player in log:
         years_played = list(log[player].keys())
         years_played.sort()
@@ -137,6 +137,8 @@ def main():
             for roundNum in range(1, ROUNDS):
                 build_line(player, year, roundNum)
 
+
+def write_data_to_file():
     out_file = open('scoresExtractedData.csv', 'w')
 
     out_file.write(
@@ -194,6 +196,9 @@ def split_file():
 
 
 if __name__ == '__main__':
-    main()
+    build_log()
+    process_team_logs()
+    process_player_logs()
+    write_data_to_file()
     filter_file()
     split_file()
