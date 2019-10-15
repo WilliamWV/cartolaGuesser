@@ -1,5 +1,4 @@
 import argparse
-import os
 
 parser = argparse.ArgumentParser(description='Receive file to extract data')
 
@@ -21,7 +20,7 @@ FT = 12
 G = 13
 GC = 14
 GS = 15
-I = 16
+IMP = 16
 PE = 18
 PP = 19
 RB = 26
@@ -39,7 +38,6 @@ ROUNDS = 38
 ATTRIBUTES = 18
 DECAY = 0.5
 
-
 file = open(args.file, 'r', encoding='utf-8')
 headers = file.readline().replace('\"', '').split(',')
 
@@ -48,101 +46,69 @@ scores = {}
 results = {}
 teams = {}
 
-def build_results():
-    files = os.listdir('data/results')
-    for file_name in files:
-        file = open(file_name, 'r', encoding='utf-8')
-
 
 def build_log():
-
     lines = [line.split(',') for line in file.readlines()]
     for line in lines:
 
-        playerID = line[PLAYER_ID]
+        player_id = line[PLAYER_ID]
         year = line[YEAR]
-        roundNum = int(line[ROUND])
-        playedThisRound = line[PLAYED_THIS_ROUND]
+        round_num = int(line[ROUND])
+        played_this_round = line[PLAYED_THIS_ROUND]
         team = line[TEAM]
-        playerTeam = line[-1]
-        homeScore = float(line[HOME_SCORE])
-        awayScore = float(line[AWAY_SCORE])
-        teamScore = 0
-        advScore = 0
+        player_team = line[-1]
+        home_score = float(line[HOME_SCORE])
+        away_score = float(line[AWAY_SCORE])
 
-        if playerTeam.find('home') >= 0:
-            teamScore = homeScore
-            advScore = awayScore
+        if player_team.find('home') >= 0:
+            team_score = home_score
+            adv_score = away_score
         else:
-            teamScore = awayScore
-            advScore = homeScore
+            team_score = away_score
+            adv_score = home_score
 
-        if teams.get(team) == None:
+        if teams.get(team) is None:
             teams[team] = {}
-        if teams[team].get(year) == None:
+        if teams[team].get(year) is None:
             teams[team][year] = {}
-        if teams[team][year].get(roundNum) == None:
-            teams[team][year][roundNum] = {'goals_scored': teamScore, 'goals_taken': advScore}
+        if teams[team][year].get(round_num) is None:
+            teams[team][year][round_num] = {'goals_scored': team_score, 'goals_taken': adv_score}
+
+        if log.get(player_id) is None:
+            log[player_id] = {}
+        if log[player_id].get(year) is None:
+            log[player_id][year] = {}
+        if log[player_id][year].get(round_num) is None:
+            log[player_id][year][round_num] = []
+
+        if played_this_round:
+            for feature in [A, CA, CV, DD, DP, FC, FD, FF, FS, FT, G, GC, GS, IMP, PE, PP, RB, SG]:
+                log[player_id][year][round_num].append(float(line[feature]))
+
+            log[player_id][year][round_num].append(team)
+            log[player_id][year][round_num].append(float(line[21]))
+            log[player_id][year][round_num].append(line[23])
+            log[player_id][year][round_num].append(float(line[24]))
 
 
-        if log.get(playerID) is None:
-            log[playerID] = {}
-        if log[playerID].get(year) is None:
-            log[playerID][year] = {}
-        if log[playerID][year].get(roundNum) is None:
-            log[playerID][year][roundNum] = []
-
-        if playedThisRound:
-            log[playerID][year][roundNum].append(float(line[A]))
-            log[playerID][year][roundNum].append(float(line[CA]))
-            log[playerID][year][roundNum].append(float(line[CV]))
-
-            log[playerID][year][roundNum].append(float(line[DD]))
-            log[playerID][year][roundNum].append(float(line[DP]))
-            log[playerID][year][roundNum].append(float(line[FC]))
-
-            log[playerID][year][roundNum].append(float(line[FD]))
-            log[playerID][year][roundNum].append(float(line[FF]))
-            log[playerID][year][roundNum].append(float(line[FS]))
-
-            log[playerID][year][roundNum].append(float(line[FT]))
-            log[playerID][year][roundNum].append(float(line[G]))
-            log[playerID][year][roundNum].append(float(line[GC]))
-
-            log[playerID][year][roundNum].append(float(line[GS]))
-            log[playerID][year][roundNum].append(float(line[I]))
-            log[playerID][year][roundNum].append(float(line[PE]))
-
-            log[playerID][year][roundNum].append(float(line[PP]))
-            log[playerID][year][roundNum].append(float(line[RB]))
-            log[playerID][year][roundNum].append(float(line[SG]))
-
-            log[playerID][year][roundNum].append(team)
-            log[playerID][year][roundNum].append(float(line[21]))
-            log[playerID][year][roundNum].append(line[23])
-            log[playerID][year][roundNum].append(float(line[24]))
-
-
-def build_line(player, year, currRound):
-
-
+def build_line(player, year, curr_round):
     if scores.get(player) is None:
         scores[player] = {}
     if scores[player].get(year) is None:
         scores[player][year] = {}
         scores[player][year][0] = [0] * ATTRIBUTES
 
-    scores[player][year][currRound] = [0] * ATTRIBUTES
+    scores[player][year][curr_round] = [0] * ATTRIBUTES
 
     for i in range(ATTRIBUTES):
-        if log[player][year].get(currRound) is not None and len(log[player][year][currRound]) > 0:
-            scores[player][year][currRound][i] = scores[player][year][currRound - 1][i] * DECAY + log[player][year][currRound][i]
+        if log[player][year].get(curr_round) is not None and len(log[player][year][curr_round]) > 0:
+            scores[player][year][curr_round][i] = scores[player][year][curr_round - 1][i] * DECAY + \
+                                                  log[player][year][curr_round][i]
         else:
-            scores[player][year][currRound][i] = scores[player][year][currRound - 1][i] * DECAY
+            scores[player][year][curr_round][i] = scores[player][year][curr_round - 1][i] * DECAY
 
 
 def main():
-
     build_log()
 
     for team in teams:
@@ -157,66 +123,75 @@ def main():
                 if teams[team][year].get(roundNum) is None:
                     teams[team][year][roundNum] = {'goals_scored': 0, 'goals_taken': 0}
 
-                teams[team][year][roundNum]['acc_goals'] = DECAY * teams[team][year][roundNum-1]['acc_goals'] + teams[team][year][roundNum]['goals_scored']
-                teams[team][year][roundNum]['tak_goals'] = DECAY * teams[team][year][roundNum-1]['tak_goals'] + teams[team][year][roundNum]['goals_taken']
+                teams[team][year][roundNum]['acc_goals'] = \
+                    DECAY * teams[team][year][roundNum - 1]['acc_goals'] + \
+                    teams[team][year][roundNum]['goals_scored']
+                teams[team][year][roundNum]['tak_goals'] = \
+                    DECAY * teams[team][year][roundNum - 1]['tak_goals'] + \
+                    teams[team][year][roundNum]['goals_taken']
 
     for player in log:
         years_played = list(log[player].keys())
         years_played.sort()
-        player_scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for year in years_played:
             for roundNum in range(1, ROUNDS):
                 build_line(player, year, roundNum)
 
-    outFile = open('scoresExtractedData.csv', 'w')
+    out_file = open('scoresExtractedData.csv', 'w')
 
-    outFile.write('PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,team,proGoals,consGoals,realScore\n')
+    out_file.write(
+        'PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,team,proGoals,'
+        'consGoals,realScore\n'
+    )
 
     for player in scores:
         for year in log[player]:
             for roundNum in range(ROUNDS):
-                outFile.write(str(player) + ',' + str(year) + ',' + str(roundNum))
+                out_file.write(str(player) + ',' + str(year) + ',' + str(roundNum))
                 for item in scores[player][year][roundNum]:
-                    outFile.write(',' + '{:.2f}'.format(item))
-                if log[player][year].get(roundNum+1) is not None and len(log[player][year][roundNum+1]) > 0:
+                    out_file.write(',' + '{:.2f}'.format(item))
+                if log[player][year].get(roundNum + 1) is not None and len(log[player][year][roundNum + 1]) > 0:
                     team = log[player][year][roundNum + 1][-4]
-                    outFile.write(',' + str(log[player][year][roundNum+1][-2]) + ',' + str(log[player][year][roundNum+1][-1]) +
-                                  ',' + str(team) + ',' + str(teams[team][year][roundNum]['acc_goals']) + ',' +
-                                  str(teams[team][year][roundNum]['tak_goals']) + ',' +
-                                  str(log[player][year][roundNum+1][-3]))
+                    out_file.write(',' + str(log[player][year][roundNum + 1][-2]) + ',' + str(
+                        log[player][year][roundNum + 1][-1]) +
+                                   ',' + str(team) + ',' + str(teams[team][year][roundNum]['acc_goals']) + ',' +
+                                   str(teams[team][year][roundNum]['tak_goals']) + ',' +
+                                   str(log[player][year][roundNum + 1][-3]))
                 else:
-                    outFile.write(',NA,NA,NA,NA,NA,NA')
+                    out_file.write(',NA,NA,NA,NA,NA,NA')
 
-                outFile.write('\n')
-    outFile.close()
+                out_file.write('\n')
+    out_file.close()
 
 
 def filter_file():
-    file = open('scoresExtractedData.csv', 'r')
-    outFile = open('scoresExtractedFiltered.csv', 'w')
-    for line in file.readlines():
+    in_file = open('scoresExtractedData.csv', 'r')
+    out_file = open('scoresExtractedFiltered.csv', 'w')
+    for line in in_file.readlines():
         if line.find('NA') < 0:
-            outFile.write(line)
+            out_file.write(line)
+
 
 def split_file():
-    file = open('scoresExtractedFiltered.csv', 'r')
-    golFile = open('scoresGol.csv', 'w')
-    zagFile = open('scoresZag.csv', 'w')
-    latFile = open('scoresLat.csv', 'w')
-    meiFile = open('scoresMei.csv', 'w')
-    ataFile = open('scoresAta.csv', 'w')
+    in_file = open('scoresExtractedFiltered.csv', 'r')
+    gol_file = open('scoresGol.csv', 'w')
+    zag_file = open('scoresZag.csv', 'w')
+    lat_file = open('scoresLat.csv', 'w')
+    mei_file = open('scoresMei.csv', 'w')
+    ata_file = open('scoresAta.csv', 'w')
 
-    for line in file.readlines():
+    for line in in_file.readlines():
         if line.find('gol') >= 0:
-            golFile.write(line)
+            gol_file.write(line)
         elif line.find('zag') >= 0:
-            zagFile.write(line)
+            zag_file.write(line)
         elif line.find('lat') >= 0:
-            latFile.write(line)
+            lat_file.write(line)
         elif line.find('mei') >= 0:
-            meiFile.write('mei')
+            mei_file.write('mei')
         elif line.find('ata') >= 0:
-            ataFile.write(line)
+            ata_file.write(line)
+
 
 if __name__ == '__main__':
     main()
