@@ -208,6 +208,9 @@ def write_train_file(in_file_path):
     out_file = open('train/' + in_file_path.replace('.csv', '') + '_train.csv', 'w')
     for line in in_file.readlines():
         third_comma_pos = line.find(',', line.find(',', line.find(',')+1)+1)
+        line = line.replace('zag,', '').replace('mei,', '').replace('lat,', '').replace('gol,', '')\
+            .replace('ata,', '').replace('pos,', '')
+
         out_file.write(line[third_comma_pos+1:])
 
 
