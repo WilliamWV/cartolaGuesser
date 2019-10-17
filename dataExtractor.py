@@ -1,4 +1,5 @@
 import argparse
+import random
 
 parser = argparse.ArgumentParser(description='Receive file to extract data')
 
@@ -203,15 +204,20 @@ def split_file():
             ata_file.write(line)
 
 
-def write_train_file(in_file_path):
+def write_nn_file(in_file_path):
     in_file = open(in_file_path, 'r')
-    out_file = open('train/' + in_file_path.replace('.csv', '') + '_train.csv', 'w')
+    train_file = open('train/' + in_file_path.replace('.csv', '') + '_train.csv', 'w')
+    test_file = open('test/' + in_file_path.replace('.csv', '') + '_test.csv', 'w')
+    TRAIN_PERCENT = 0.7
     for line in in_file.readlines():
         third_comma_pos = line.find(',', line.find(',', line.find(',')+1)+1)
         line = line.replace('zag,', '').replace('mei,', '').replace('lat,', '').replace('gol,', '')\
             .replace('ata,', '').replace('pos,', '')
+        if random.random() <= TRAIN_PERCENT:
+            train_file.write(line[third_comma_pos+1:])
+        else:
+            test_file.write(line[third_comma_pos+1:])
 
-        out_file.write(line[third_comma_pos+1:])
 
 
 if __name__ == '__main__':
@@ -222,4 +228,4 @@ if __name__ == '__main__':
     filter_file()
     split_file()
     for ans_file in ['scoresGol.csv', 'scoresZag.csv', 'scoresLat.csv', 'scoresMei.csv', 'scoresAta.csv']:
-        write_train_file(ans_file)
+        write_nn_file(ans_file)
