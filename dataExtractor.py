@@ -112,7 +112,8 @@ def build_line(player, year, curr_round):
                                                log[player][year][curr_round][-1]
     else:
         scores[player][year][curr_round][-1] = scores[player][year][curr_round - 1][-1] * DECAY
-    
+
+
 def process_team_logs():
     for team in teams:
         for year in teams[team]:
@@ -212,16 +213,15 @@ def write_nn_file(in_file_path):
     in_file = open(in_file_path, 'r')
     train_file = open('train/' + in_file_path.replace('.csv', '') + '_train.csv', 'w')
     test_file = open('test/' + in_file_path.replace('.csv', '') + '_test.csv', 'w')
-    TRAIN_PERCENT = 0.7
+    train_percent = 0.7
     for line in in_file.readlines():
         third_comma_pos = line.find(',', line.find(',', line.find(',')+1)+1)
         line = line.replace('zag,', '').replace('mei,', '').replace('lat,', '').replace('gol,', '')\
             .replace('ata,', '').replace('pos,', '')
-        if random.random() <= TRAIN_PERCENT:
+        if random.random() <= train_percent:
             train_file.write(line[third_comma_pos+1:])
         else:
             test_file.write(line[third_comma_pos+1:])
-
 
 
 if __name__ == '__main__':
