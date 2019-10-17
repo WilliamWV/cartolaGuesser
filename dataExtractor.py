@@ -85,7 +85,6 @@ def build_log():
         if played_this_round:
             for feature in [A, CA, CV, DD, DP, FC, FD, FF, FS, FT, G, GC, GS, IMP, PE, PP, RB, SG]:
                 log[player_id][year][round_num].append(float(line[feature]))
-
             log[player_id][year][round_num].append(team)
             log[player_id][year][round_num].append(float(line[21]))
             log[player_id][year][round_num].append(line[23])
@@ -97,9 +96,9 @@ def build_line(player, year, curr_round):
         scores[player] = {}
     if scores[player].get(year) is None:
         scores[player][year] = {}
-        scores[player][year][0] = [0] * ATTRIBUTES
+        scores[player][year][0] = [0] * (ATTRIBUTES + 1)
 
-    scores[player][year][curr_round] = [0] * ATTRIBUTES
+    scores[player][year][curr_round] = [0] * (ATTRIBUTES + 1)
 
     for i in range(ATTRIBUTES):
         if log[player][year].get(curr_round) is not None and len(log[player][year][curr_round]) > 0:
@@ -108,7 +107,12 @@ def build_line(player, year, curr_round):
         else:
             scores[player][year][curr_round][i] = scores[player][year][curr_round - 1][i] * DECAY
 
-
+    if log[player][year].get(curr_round) is not None and len(log[player][year][curr_round]) > 0:
+        scores[player][year][curr_round][-1] = scores[player][year][curr_round - 1][-1] * DECAY + \
+                                               log[player][year][curr_round][-1]
+    else:
+        scores[player][year][curr_round][-1] = scores[player][year][curr_round - 1][-1] * DECAY
+    
 def process_team_logs():
     for team in teams:
         for year in teams[team]:
