@@ -214,14 +214,20 @@ def write_nn_file(in_file_path):
     train_file = open('train/' + in_file_path.replace('.csv', '') + '_train.csv', 'w')
     test_file = open('test/' + in_file_path.replace('.csv', '') + '_test.csv', 'w')
     train_percent = 0.7
+    first_line = True
     for line in in_file.readlines():
         third_comma_pos = line.find(',', line.find(',', line.find(',')+1)+1)
         line = line.replace('zag,', '').replace('mei,', '').replace('lat,', '').replace('gol,', '')\
             .replace('ata,', '').replace('pos,', '')
-        if random.random() <= train_percent:
+        if first_line:
             train_file.write(line[third_comma_pos+1:])
-        else:
             test_file.write(line[third_comma_pos+1:])
+            first_line = False
+        else:
+            if random.random() <= train_percent:
+                train_file.write(line[third_comma_pos+1:])
+            else:
+                test_file.write(line[third_comma_pos+1:])
 
 
 if __name__ == '__main__':
