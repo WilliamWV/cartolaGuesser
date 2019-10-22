@@ -1,94 +1,201 @@
 import argparse
 import random
+import os
 
-parser = argparse.ArgumentParser(description='Receive file to extract data')
-
-parser.add_argument('-f', '--file', required=True, type=str,
-                    help='File from which the data may be extracted')
-
-args = parser.parse_args()
-
-A = 0
-CA = 3
-CV = 4
-DD = 6
-DP = 7
-FC = 8
-FD = 9
-FF = 10
-FS = 11
-FT = 12
-G = 13
-GC = 14
-GS = 15
-IMP = 16
-PE = 18
-PP = 19
-RB = 26
-SG = 28
-
-PLAYER_ID = 2
-YEAR = 30
-ROUND = 27
-PLAYED_THIS_ROUND = 20
-TEAM = 5
-HOME_SCORE = 71
-AWAY_SCORE = 67
-
-ROUNDS = 38
-ATTRIBUTES = 18
-DECAY = 0.5
-
-file = open(args.file, 'r', encoding='utf-8')
-headers = file.readline().replace('\"', '').split(',')
 
 log = {}
 scores = {}
 results = {}
 teams = {}
 
+ROUNDS = 38
+ATTRIBUTES = 18
+DECAY = 0.5
 
-def build_log():
-    lines = [line.split(',') for line in file.readlines()]
-    for line in lines:
 
-        player_id = line[PLAYER_ID]
-        year = line[YEAR]
-        round_num = int(line[ROUND])
-        played_this_round = line[PLAYED_THIS_ROUND]
-        team = line[TEAM]
-        player_team = line[-1]
-        home_score = float(line[HOME_SCORE])
-        away_score = float(line[AWAY_SCORE])
+class FileReader:
+    A = 0
+    CA = 3
+    CV = 4
+    DD = 6
+    DP = 7
+    FC = 8
+    FD = 9
+    FF = 10
+    FS = 11
+    FT = 12
+    G = 13
+    GC = 14
+    GS = 15
+    IMP = 16
+    PE = 18
+    PP = 19
+    RB = 26
+    SG = 28
 
-        if player_team.find('home') >= 0:
-            team_score = home_score
-            adv_score = away_score
-        else:
-            team_score = away_score
-            adv_score = home_score
+    PLAYER_ID = 2
+    YEAR = 30
+    ROUND = 27
+    PLAYED_THIS_ROUND = 20
+    TEAM = 5
+    HOME_SCORE = 71
+    AWAY_SCORE = 67
 
-        if teams.get(team) is None:
-            teams[team] = {}
-        if teams[team].get(year) is None:
-            teams[team][year] = {}
-        if teams[team][year].get(round_num) is None:
-            teams[team][year][round_num] = {'goals_scored': team_score, 'goals_taken': adv_score}
+    def __init__(self, file_name):
+        self.file = open(file_name, 'r')
 
-        if log.get(player_id) is None:
-            log[player_id] = {}
-        if log[player_id].get(year) is None:
-            log[player_id][year] = {}
-        if log[player_id][year].get(round_num) is None:
-            log[player_id][year][round_num] = []
+    def build_log(self):
+        global log, teams
+        lines = [line.split(',') for line in self.file.readlines()]
+        for line in lines:
 
-        if played_this_round:
-            for feature in [A, CA, CV, DD, DP, FC, FD, FF, FS, FT, G, GC, GS, IMP, PE, PP, RB, SG]:
-                log[player_id][year][round_num].append(float(line[feature]))
-            log[player_id][year][round_num].append(team)
-            log[player_id][year][round_num].append(float(line[21]))
-            log[player_id][year][round_num].append(line[23])
-            log[player_id][year][round_num].append(float(line[24]))
+            player_id = line[self.PLAYER_ID]
+            year = line[self.YEAR]
+            round_num = int(line[self.ROUND])
+            played_this_round = line[self.PLAYED_THIS_ROUND].find('True') == 0
+            team = line[self.TEAM]
+            player_team = line[-1]
+            home_score = float(line[self.HOME_SCORE])
+            away_score = float(line[self.AWAY_SCORE])
+
+            if player_team.find('home') >= 0:
+                team_score = home_score
+                adv_score = away_score
+            else:
+                team_score = away_score
+                adv_score = home_score
+
+            if teams.get(team) is None:
+                teams[team] = {}
+            if teams[team].get(year) is None:
+                teams[team][year] = {}
+            if teams[team][year].get(round_num) is None:
+                teams[team][year][round_num] = {'goals_scored': team_score, 'goals_taken': adv_score}
+
+            if log.get(player_id) is None:
+                log[player_id] = {}
+            if log[player_id].get(year) is None:
+                log[player_id][year] = {}
+            if log[player_id][year].get(round_num) is None:
+                log[player_id][year][round_num] = []
+
+            if played_this_round and len(log[player_id][year][round_num]) == 0:
+                for feature in [self.A, self.CA, self.CV, self.DD, self.DP, self.FC, self.FD, self.FF, self.FS,
+                                self.FT, self.G, self.GC, self.GS, self.IMP, self.PE, self.PP, self.RB, self.SG]:
+
+                    log[player_id][year][round_num].append(float(line[feature]))
+
+                log[player_id][year][round_num].append(team)
+                log[player_id][year][round_num].append(float(line[21]))
+                log[player_id][year][round_num].append(line[23])
+                log[player_id][year][round_num].append(float(line[24]))
+        self.file.close()
+
+
+class DirReader:
+    A = 26
+    CA = 27
+    CV = 29
+    DD = 23
+    DP = 32
+    FC = 18
+    FD = 22
+    FF = 20
+    FS = 15
+    FT = 21
+    G = 19
+    GC = 31
+    GS = 24
+    IMP = 28
+    PE = 17
+    PP = 30
+    RB = 16
+    SG = 25
+
+    PLAYER_ID = 5
+    ROUND = 6
+    TEAM = 14
+
+    def __init__(self, dir_name):
+        temp_files = os.listdir(dir_name)
+        self.year = dir_name[5:9]
+        self.files = [dir_name + '/' + tf for tf in temp_files]
+
+    def build_log(self):
+        global log, teams
+        for file in self.files:
+            file_handler = open(file)
+            lines = [line.split(',') for line in file_handler.readlines()]
+            round_num = int(file[file.rfind('-')+1:])
+            playing_teams = []
+            team_goals = {}
+
+            for line in lines:
+
+                player_id = line[self.PLAYER_ID]
+                played_this_round = line.count(',NA') < 18
+                team = line[self.TEAM]
+
+                if team not in playing_teams:
+                    playing_teams.append(team)
+                    team_goals[team] = [0.0, 0.0]
+
+                if log.get(player_id) is None:
+                    log[player_id] = {}
+                if log[player_id].get(self.year) is None:
+                    log[player_id][self.year] = {}
+                if log[player_id][self.year].get(round_num) is None:
+                    log[player_id][self.year][round_num] = []
+
+                if played_this_round and len(log[player_id][self.year][round_num]) == 0:
+                    for feature in [self.A, self.CA, self.CV, self.DD, self.DP, self.FC, self.FD, self.FF, self.FS,
+                                    self.FT, self.G, self.GC, self.GS, self.IMP, self.PE, self.PP, self.RB, self.SG]:
+                        log[player_id][self.year][round_num].append(float(line[feature]))
+
+                    team_goals[team][0] += float(line[self.G])
+                    team_goals[team][1] += float(line[self.GS])
+
+                    log[player_id][self.year][round_num].append(team)
+                    log[player_id][self.year][round_num].append(float(line[21]))
+                    log[player_id][self.year][round_num].append(line[23])
+                    log[player_id][self.year][round_num].append(float(line[24]))
+
+            for team in team_goals:
+                if teams.get(team) is None:
+                    teams[team] = {}
+                if teams[team].get(self.year) is None:
+                    teams[team][self.year] = {}
+                if teams[team][self.year].get(round_num) is None:
+                    teams[team][self.year][round_num] = {'goals_scored': team_goals[team][0],
+                                                         'goals_taken': team_goals[team][1]}
+
+            file_handler.close()
+
+
+def parse_input():
+
+    parser = argparse.ArgumentParser(description='Receive file to extract data')
+    parser.add_argument('-d', '--dir', required=True, type=str,
+                        help='Directory with data')
+
+    args = parser.parse_args()
+
+    kids = os.listdir(args.dir)
+    kids = [args.dir + '/' + k for k in kids]
+
+    file_names = [f for f in kids if os.path.isfile(f)]
+    dir_names = [d for d in kids if os.path.isdir(d)]
+
+    return file_names, dir_names
+
+
+def build_log(file_names, dir_names):
+    for d in dir_names:
+        d_handler = DirReader(d)
+        d_handler.build_log()
+    for f in file_names:
+        f_handler = FileReader(f)
+        f_handler.build_log()
 
 
 def build_line(player, year, curr_round):
@@ -231,7 +338,9 @@ def write_nn_file(in_file_path):
 
 
 if __name__ == '__main__':
-    build_log()
+
+    files, dirs = parse_input()
+    build_log(files, dirs)
     process_team_logs()
     process_player_logs()
     write_data_to_file()
