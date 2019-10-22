@@ -28,17 +28,9 @@ def main():
     train = pd.read_csv(args.dataset, delimiter=',', header=0)
     test = pd.read_csv(args.test, delimiter=',', header=0)
 
-    print("Read csv data")
 
     test_target = test.pop('realScore')
-    test_dataset = tf.data.Dataset.from_tensor_slices((test.values, test_target.values))
-
-    print("Created test datasets")
-
     train_target = train.pop('realScore')
-    # train_dataset = tf.data.Dataset.from_tensor_slices((train.values, train_target.values))
-
-    print("Created train datasets")
 
     model = tf.keras.models.Sequential([
         tf.keras.layers.Flatten(input_shape=(22, 1)),
@@ -47,7 +39,7 @@ def main():
         tf.keras.layers.Dense(1, activation='softmax')
     ])
 
-    model.compile(optimizer='adam', loss='mean_absolute_error', metrics=['accuracy'])
+    model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
     model.fit(get_values_from_dataframe(train), get_values_from_dataframe(train_target), epochs=200)
     model.evaluate(get_values_from_dataframe(test), get_values_from_dataframe(test_target))
 
