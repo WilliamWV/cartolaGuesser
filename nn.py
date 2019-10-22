@@ -1,10 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import functools
-
 import tensorflow as tf
 import numpy as np
 import pandas as pd
-
+import datetime
 import argparse
 
 parser = argparse.ArgumentParser(description='Receive dataset to train')
@@ -34,13 +33,16 @@ def main():
 
     model = tf.keras.models.Sequential([
         tf.keras.layers.Flatten(input_shape=(22, 1)),
-        tf.keras.layers.Dense(32, activation='relu'),
-        tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.Dense(1, activation='softmax')
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(1)
     ])
 
-    model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
-    model.fit(get_values_from_dataframe(train), get_values_from_dataframe(train_target), epochs=200)
+    log_dir = "logs\\fit\\" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
+    model.compile(optimizer='adam', loss='mse')
+    model.fit(get_values_from_dataframe(train), get_values_from_dataframe(train_target), epochs=5, callbacks=[tensorboard_callback])
     model.evaluate(get_values_from_dataframe(test), get_values_from_dataframe(test_target))
 
 
