@@ -15,24 +15,15 @@ parser.add_argument('-t', '--test', required=True, type=str,
 args = parser.parse_args()
 
 
-def get_values_from_dataframe(dataframe):
-    values = dataframe.values
-    if len(values.shape) == 2:
-        return values.reshape((values.shape[0], values.shape[1], 1))
-    else:
-        return values
-
-
 def main():
     train = pd.read_csv(args.dataset, delimiter=',', header=0)
     test = pd.read_csv(args.test, delimiter=',', header=0)
-
 
     test_target = test.pop('realScore')
     train_target = train.pop('realScore')
 
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Flatten(input_shape=(22, 1)),
+        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dense(1)
@@ -41,9 +32,9 @@ def main():
     log_dir = "logs\\fit\\" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-    model.compile(optimizer='adam', loss='mse')
-    model.fit(get_values_from_dataframe(train), get_values_from_dataframe(train_target), epochs=5, callbacks=[tensorboard_callback])
-    model.evaluate(get_values_from_dataframe(test), get_values_from_dataframe(test_target))
+    model.compile(optimizer='adam', loss='mse', metrics=['mse', 'mae'])
+    model.fit(train, train_target, epochs=500, callbacks=[tensorboard_callback])
+    model.evaluate(test, test_target, callbacks=[tensorboard_callback])
 
 
 if __name__ == '__main__':
