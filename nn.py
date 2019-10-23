@@ -131,7 +131,7 @@ def main():
         train_tuple, test_tuple = read_data(dataset[0], dataset[1])
         models = build_models(train_tuple, test_tuple)
         for model in models:
-            model.train_dataset()
+            model.train()
             model.evaluate()
 
 
