@@ -338,7 +338,7 @@ def split_file():
         elif line.find('lat') >= 0:
             lat_file.write(line)
         elif line.find('mei') >= 0:
-            mei_file.write('mei')
+            mei_file.write(line)
         elif line.find('ata') >= 0:
             ata_file.write(line)
 
