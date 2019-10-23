@@ -22,9 +22,9 @@ class Model:
     def __init__(self, model, name, train_tuple, test_tuple):
         self.model = model
         self.name = name
-        self.train = train_tuple[0]
+        self.train_dataset = train_tuple[0]
         self.train_target = train_tuple[1]
-        self.test = test_tuple[0]
+        self.test_dataset = test_tuple[0]
         self.test_target = test_tuple[1]
         similar_items = 0
         for item in os.listdir('logs/fit'):
@@ -39,13 +39,13 @@ class Model:
     def train(self):
         self.model.compile(optimizer='adam', loss='mse', metrics=['mse', 'mae'])
         self.model.fit(
-            self.train, self.train_target,
+            self.train_dataset, self.train_target,
             epochs=EPOCHS, callbacks=[self.tensorboard_callback],
-            validation_data=(self.test, self.test_target)
+            validation_data=(self.test_dataset, self.test_target)
         )
 
     def evaluate(self):
-        self.model.evaluate(self.test, self.test_target, callbacks=[self.tensorboard_callback])
+        self.model.evaluate(self.test_dataset, self.test_target, callbacks=[self.tensorboard_callback])
 
 
 def read_data(train_dataset, test_dataset):
@@ -131,7 +131,7 @@ def main():
         train_tuple, test_tuple = read_data(dataset[0], dataset[1])
         models = build_models(train_tuple, test_tuple)
         for model in models:
-            model.train()
+            model.train_dataset()
             model.evaluate()
 
 
