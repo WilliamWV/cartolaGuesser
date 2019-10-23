@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import functools
 import tensorflow as tf
+from tensorflow import keras
 import numpy as np
 import pandas as pd
 import datetime
@@ -23,9 +24,9 @@ def main():
     train_target = train.pop('realScore')
 
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
-        tf.keras.layers.Dense(64, activation='relu'),
-        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(22, activation='relu', input_shape=[22], kernel_regularizer=keras.regularizers.l2(0.001)),
+        tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=keras.regularizers.l2(0.001)),
+        tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=keras.regularizers.l2(0.001)),
         tf.keras.layers.Dense(1)
     ])
 
@@ -33,7 +34,11 @@ def main():
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     model.compile(optimizer='adam', loss='mse', metrics=['mse', 'mae'])
-    model.fit(train, train_target, epochs=500, callbacks=[tensorboard_callback])
+    model.fit(
+        train, train_target,
+        epochs=50, callbacks=[tensorboard_callback],
+        validation_data=(test, test_target)
+    )
     model.evaluate(test, test_target, callbacks=[tensorboard_callback])
 
 
