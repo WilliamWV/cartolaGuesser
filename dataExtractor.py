@@ -2,7 +2,6 @@ import argparse
 import random
 import os
 
-
 log = {}
 scores = {}
 results = {}
@@ -41,8 +40,14 @@ class FileReader:
     HOME_SCORE = 71
     AWAY_SCORE = 67
 
+    PONTOS = 21
+    PRECO = 24
+    POS = 23
+
     def __init__(self, file_name):
-        self.file = open(file_name, 'r')
+        print("Reading file: " + file_name)
+        self.file = open(file_name, 'r', encoding='utf-8')
+        self.file.readline()  # read headers
 
     def build_log(self):
         global log, teams
@@ -82,51 +87,67 @@ class FileReader:
             if played_this_round and len(log[player_id][year][round_num]) == 0:
                 for feature in [self.A, self.CA, self.CV, self.DD, self.DP, self.FC, self.FD, self.FF, self.FS,
                                 self.FT, self.G, self.GC, self.GS, self.IMP, self.PE, self.PP, self.RB, self.SG]:
-
                     log[player_id][year][round_num].append(float(line[feature]))
 
                 log[player_id][year][round_num].append(team)
-                log[player_id][year][round_num].append(float(line[21]))
-                log[player_id][year][round_num].append(line[23])
-                log[player_id][year][round_num].append(float(line[24]))
+                log[player_id][year][round_num].append(float(line[self.PONTOS]))
+                log[player_id][year][round_num].append(line[self.POS])
+                log[player_id][year][round_num].append(float(line[self.PRECO]))
         self.file.close()
 
 
+# noinspection PyAttributeOutsideInit
 class DirReader:
-    A = 26
-    CA = 27
-    CV = 29
-    DD = 23
-    DP = 32
-    FC = 18
-    FD = 22
-    FF = 20
-    FS = 15
-    FT = 21
-    G = 19
-    GC = 31
-    GS = 24
-    IMP = 28
-    PE = 17
-    PP = 30
-    RB = 16
-    SG = 25
-
-    PLAYER_ID = 5
-    ROUND = 6
-    TEAM = 14
 
     def __init__(self, dir_name):
         temp_files = os.listdir(dir_name)
         self.year = dir_name[5:9]
         self.files = [dir_name + '/' + tf for tf in temp_files]
 
+    def discover_headers(self, file):
+        headers = file.readline().replace("\"", '').replace('\n', '').split(',')
+        self.A = headers.index('A')
+        self.CA = headers.index('CA')
+        self.CV = headers.index('CV')
+        self.DD = headers.index('DD')
+        if 'DP' in headers:
+            self.DP = headers.index('DP')
+        else:
+            self.DP = -1
+        self.FC = headers.index('FC')
+        self.FD = headers.index('FD')
+        self.FF = headers.index('FF')
+        self.FS = headers.index('FS')
+        self.FT = headers.index('FT')
+        self.G = headers.index('G')
+        if 'GC' in headers:
+            self.GC = headers.index('GC')
+        else:
+            self.GC = -1
+        self.GS = headers.index('GS')
+        self.IMP = headers.index('I')
+        self.PE = headers.index('PE')
+        if 'PP' in headers:
+            self.PP = headers.index('PP')
+        else:
+            self.PP = -1
+        self.RB = headers.index('RB')
+        self.SG = headers.index('SG')
+
+        self.PLAYER_ID = headers.index('atletas.atleta_id')
+        self.TEAM = headers.index('atletas.clube.id.full.name')
+        self.PONTOS = headers.index('atletas.pontos_num')
+        self.PRECO = headers.index('atletas.preco_num')
+        self.POS = headers.index('atletas.posicao_id')
+
     def build_log(self):
         global log, teams
         for file in self.files:
-            file_handler = open(file)
-            lines = [line.split(',') for line in file_handler.readlines()]
-            round_num = int(file[file.rfind('-')+1:])
+            file_handler = open(file, 'r', encoding='utf-8')
+            print('Reading file: ' + file)
+            self.discover_headers(file_handler)
+            lines = [line.replace("\"", '').replace('\n', '').split(',') for line in file_handler.readlines()]
+            round_num = int(file[file.rfind('-') + 1:file.rfind('.')])
             playing_teams = []
             team_goals = {}
 
@@ -150,15 +171,22 @@ class DirReader:
                 if played_this_round and len(log[player_id][self.year][round_num]) == 0:
                     for feature in [self.A, self.CA, self.CV, self.DD, self.DP, self.FC, self.FD, self.FF, self.FS,
                                     self.FT, self.G, self.GC, self.GS, self.IMP, self.PE, self.PP, self.RB, self.SG]:
-                        log[player_id][self.year][round_num].append(float(line[feature]))
+                        if feature == -1 or line[feature] == 'NA':
+                            feature_val = 0.0
+                        else:
+                            feature_val = float(line[feature])
 
-                    team_goals[team][0] += float(line[self.G])
-                    team_goals[team][1] += float(line[self.GS])
+                        log[player_id][self.year][round_num].append(feature_val)
+
+                    if line[self.G] != 'NA':
+                        team_goals[team][0] += float(line[self.G])
+                    if line[self.GS] != 'NA':
+                        team_goals[team][1] += float(line[self.GS])
 
                     log[player_id][self.year][round_num].append(team)
-                    log[player_id][self.year][round_num].append(float(line[21]))
-                    log[player_id][self.year][round_num].append(line[23])
-                    log[player_id][self.year][round_num].append(float(line[24]))
+                    log[player_id][self.year][round_num].append(float(line[self.PONTOS]))
+                    log[player_id][self.year][round_num].append(line[self.POS])
+                    log[player_id][self.year][round_num].append(float(line[self.PRECO]))
 
             for team in team_goals:
                 if teams.get(team) is None:
@@ -173,7 +201,6 @@ class DirReader:
 
 
 def parse_input():
-
     parser = argparse.ArgumentParser(description='Receive file to extract data')
     parser.add_argument('-d', '--dir', required=True, type=str,
                         help='Directory with data')
@@ -323,28 +350,35 @@ def write_nn_file(in_file_path):
     train_percent = 0.7
     first_line = True
     for line in in_file.readlines():
-        third_comma_pos = line.find(',', line.find(',', line.find(',')+1)+1)
-        line = line.replace('zag,', '').replace('mei,', '').replace('lat,', '').replace('gol,', '')\
+        third_comma_pos = line.find(',', line.find(',', line.find(',') + 1) + 1)
+        line = line.replace('zag,', '').replace('mei,', '').replace('lat,', '').replace('gol,', '') \
             .replace('ata,', '').replace('pos,', '')
         if first_line:
-            train_file.write(line[third_comma_pos+1:])
-            test_file.write(line[third_comma_pos+1:])
+            train_file.write(line[third_comma_pos + 1:])
+            test_file.write(line[third_comma_pos + 1:])
             first_line = False
         else:
             if random.random() <= train_percent:
-                train_file.write(line[third_comma_pos+1:])
+                train_file.write(line[third_comma_pos + 1:])
             else:
-                test_file.write(line[third_comma_pos+1:])
+                test_file.write(line[third_comma_pos + 1:])
 
 
 if __name__ == '__main__':
 
+    print("Parsing input")
     files, dirs = parse_input()
+    print("Building log")
     build_log(files, dirs)
+    print("Processing team log")
     process_team_logs()
+    print("Processing player log")
     process_player_logs()
+    print("Writing data to file")
     write_data_to_file()
+    print("Filtering file")
     filter_file()
+    print("Splitting file")
     split_file()
     for ans_file in ['scoresGol.csv', 'scoresZag.csv', 'scoresLat.csv', 'scoresMei.csv', 'scoresAta.csv']:
         write_nn_file(ans_file)
