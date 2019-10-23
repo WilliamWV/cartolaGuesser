@@ -84,8 +84,8 @@ def build_models(train_tuple, test_tuple):
 
     temp_model = tf.keras.models.Sequential([
         tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
-        tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=keras.regulatizers.l2(0.001)),
-        tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=keras.regulatizers.l2(0.001)),
+        tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=keras.regularizers.l2(0.001)),
+        tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=keras.regularizers.l2(0.001)),
         tf.keras.layers.Dense(1)
     ])
     models.append(Model(temp_model, "64x64_L2", train_tuple, test_tuple))
