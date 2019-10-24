@@ -36,7 +36,7 @@ class Model:
         self.test_target = test_tuple[1]
         similar_items = 0
         for item in os.listdir('logs/fit'):
-            if item.find('self.name') >= 0:
+            if item.find(self.name) >= 0:
                 similar_items += 1
         log_dir = "logs\\fit\\" + self.name
         if similar_items > 0:
@@ -54,6 +54,19 @@ class Model:
 
     def evaluate(self):
         self.model.evaluate(self.test_dataset, self.test_target, callbacks=[self.tensorboard_callback])
+
+    def save(self):
+        similar_items = 0
+        for item in os.listdir('models'):
+            if item.find(self.name) >= 0:
+                similar_items += 1
+
+        if similar_items > 0:
+            file_name = self.name + '_' + str(similar_items) + '.h5'
+        else:
+            file_name = self.name + '.h5'
+
+        self.model.save('models/' + file_name)
 
 
 def read_data(train_dataset, test_dataset):
@@ -138,7 +151,7 @@ def build_models(train_tuple, test_tuple, abbr):
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "512_dropout_02_" + abbr, train_tuple, test_tuple))
+    old_models.append(Model(temp_model, "512_dropout_02_" + abbr, train_tuple, test_tuple))
 
     temp_model = tf.keras.models.Sequential([
         tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
@@ -148,7 +161,7 @@ def build_models(train_tuple, test_tuple, abbr):
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "256x128_dropout_02_" + abbr, train_tuple, test_tuple))
+    old_models.append(Model(temp_model, "256x128_dropout_02_" + abbr, train_tuple, test_tuple))
 
     temp_model = tf.keras.models.Sequential([
         tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
@@ -160,7 +173,30 @@ def build_models(train_tuple, test_tuple, abbr):
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "128x64x32_dropout_02_" + abbr, train_tuple, test_tuple))
+    old_models.append(Model(temp_model, "128x64x32_dropout_02_" + abbr, train_tuple, test_tuple))
+
+    temp_model = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(256, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(1)
+    ])
+    models.append(Model(temp_model, "256x128_dropout_05_" + abbr, train_tuple, test_tuple))
+
+    temp_model = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(32, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(1)
+    ])
+    models.append(Model(temp_model, "128x64x32_dropout_05_" + abbr, train_tuple, test_tuple))
+
     return models
 
 
@@ -171,6 +207,7 @@ def main():
         for model in models:
             model.train()
             model.evaluate()
+            model.save()
 
 
 if __name__ == '__main__':
