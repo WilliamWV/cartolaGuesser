@@ -300,7 +300,7 @@ def write_data_to_file():
                                    '{:.2f}'.format(teams[team][year][roundNum]['tak_goals']) + ',' +
                                    str(log[player][year][roundNum + 1][-3]))
                 elif log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0:
-                    team = log[player][year][roundNum + 1][-4]
+                    team = log[player][year][roundNum][-4]
                     out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum]['acc_goals']) + ',' +
                                    '{:.2f}'.format(teams[team][year][roundNum]['tak_goals']) + ',NA')
                 else:
