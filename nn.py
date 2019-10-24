@@ -67,7 +67,7 @@ def read_data(train_dataset, test_dataset):
 
 def build_models(train_tuple, test_tuple, abbr):
     models = []
-
+    old_models = []
     # 64x64 Dropout = 0.5
     temp_model = tf.keras.models.Sequential([
         tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
@@ -77,7 +77,7 @@ def build_models(train_tuple, test_tuple, abbr):
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "64x64_dropout_05_" + abbr, train_tuple, test_tuple))
+    old_models.append(Model(temp_model, "64x64_dropout_05_" + abbr, train_tuple, test_tuple))
 
     # 64x64 No regularization
     temp_model = tf.keras.models.Sequential([
@@ -86,7 +86,7 @@ def build_models(train_tuple, test_tuple, abbr):
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "64x64_noreg_" + abbr, train_tuple, test_tuple))
+    old_models.append(Model(temp_model, "64x64_noreg_" + abbr, train_tuple, test_tuple))
 
     # 64x64 L2 regularization
 
@@ -96,7 +96,7 @@ def build_models(train_tuple, test_tuple, abbr):
         tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=keras.regularizers.l2(0.001)),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "64x64_L2_" + abbr, train_tuple, test_tuple))
+    old_models.append(Model(temp_model, "64x64_L2_" + abbr, train_tuple, test_tuple))
 
     # 64x64 Dropout = 0.2
     temp_model = tf.keras.models.Sequential([
@@ -107,7 +107,7 @@ def build_models(train_tuple, test_tuple, abbr):
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "64x64_dropout_02_" + abbr, train_tuple, test_tuple))
+    old_models.append(Model(temp_model, "64x64_dropout_02_" + abbr, train_tuple, test_tuple))
 
     # 512 Dropout = 0.5
     temp_model = tf.keras.models.Sequential([
@@ -116,7 +116,7 @@ def build_models(train_tuple, test_tuple, abbr):
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "512_dropout_05_" + abbr, train_tuple, test_tuple))
+    old_models.append(Model(temp_model, "512_dropout_05_" + abbr, train_tuple, test_tuple))
 
     # 32x32x32 Dropout = 0.5
     temp_model = tf.keras.models.Sequential([
@@ -129,8 +129,38 @@ def build_models(train_tuple, test_tuple, abbr):
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "32x32x32_dropout_05_" + abbr, train_tuple, test_tuple))
+    old_models.append(Model(temp_model, "32x32x32_dropout_05_" + abbr, train_tuple, test_tuple))
 
+    # 512 Dropout = 0.2
+    temp_model = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(512, activation='relu'),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(1)
+    ])
+    models.append(Model(temp_model, "512_dropout_02_" + abbr, train_tuple, test_tuple))
+
+    temp_model = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(256, activation='relu'),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(1)
+    ])
+    models.append(Model(temp_model, "256x128_dropout_02_" + abbr, train_tuple, test_tuple))
+
+    temp_model = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(32, activation='relu'),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(1)
+    ])
+    models.append(Model(temp_model, "128x64x32_dropout_02_" + abbr, train_tuple, test_tuple))
     return models
 
 
