@@ -14,6 +14,14 @@ datasets = [
     ('train/scoresGol_train.csv', 'test/scoresGol_test.csv'),
 ]
 
+dataset_abbr = {
+    'train/scoresAta_train.csv': 'ata',
+    'train/scoresMei_train.csv': 'mei',
+    'train/scoresZag_train.csv': 'zag',
+    'train/scoresLat_train.csv': 'lat',
+    'train/scoresGol_train.csv': 'gol',
+}
+
 EPOCHS = 200
 
 
@@ -57,7 +65,7 @@ def read_data(train_dataset, test_dataset):
     return (train, train_target), (test, test_target)
 
 
-def build_models(train_tuple, test_tuple):
+def build_models(train_tuple, test_tuple, abbr):
     models = []
 
     # 64x64 Dropout = 0.5
@@ -69,7 +77,7 @@ def build_models(train_tuple, test_tuple):
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "64x64_dropout_05", train_tuple, test_tuple))
+    models.append(Model(temp_model, "64x64_dropout_05_" + abbr, train_tuple, test_tuple))
 
     # 64x64 No regularization
     temp_model = tf.keras.models.Sequential([
@@ -78,9 +86,9 @@ def build_models(train_tuple, test_tuple):
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "64x64_noreg", train_tuple, test_tuple))
+    models.append(Model(temp_model, "64x64_noreg_" + abbr, train_tuple, test_tuple))
 
-    #64x64 L2 regularization
+    # 64x64 L2 regularization
 
     temp_model = tf.keras.models.Sequential([
         tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
@@ -88,7 +96,7 @@ def build_models(train_tuple, test_tuple):
         tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=keras.regularizers.l2(0.001)),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "64x64_L2", train_tuple, test_tuple))
+    models.append(Model(temp_model, "64x64_L2_" + abbr, train_tuple, test_tuple))
 
     # 64x64 Dropout = 0.2
     temp_model = tf.keras.models.Sequential([
@@ -99,7 +107,7 @@ def build_models(train_tuple, test_tuple):
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "64x64_dropout_02", train_tuple, test_tuple))
+    models.append(Model(temp_model, "64x64_dropout_02_" + abbr, train_tuple, test_tuple))
 
     # 512 Dropout = 0.5
     temp_model = tf.keras.models.Sequential([
@@ -108,7 +116,7 @@ def build_models(train_tuple, test_tuple):
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "512_dropout_05", train_tuple, test_tuple))
+    models.append(Model(temp_model, "512_dropout_05_" + abbr, train_tuple, test_tuple))
 
     # 32x32x32 Dropout = 0.5
     temp_model = tf.keras.models.Sequential([
@@ -121,7 +129,7 @@ def build_models(train_tuple, test_tuple):
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(1)
     ])
-    models.append(Model(temp_model, "32x32x32_dropout_05", train_tuple, test_tuple))
+    models.append(Model(temp_model, "32x32x32_dropout_05_" + abbr, train_tuple, test_tuple))
 
     return models
 
@@ -129,7 +137,7 @@ def build_models(train_tuple, test_tuple):
 def main():
     for dataset in datasets:
         train_tuple, test_tuple = read_data(dataset[0], dataset[1])
-        models = build_models(train_tuple, test_tuple)
+        models = build_models(train_tuple, test_tuple, dataset_abbr[dataset[0]])
         for model in models:
             model.train()
             model.evaluate()
