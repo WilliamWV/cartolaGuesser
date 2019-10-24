@@ -278,6 +278,25 @@ def process_player_logs():
                 build_line(player, year, roundNum)
 
 
+def get_player_team(player, year_target, roundNum_target):
+    player_teams = []
+    for year in log[player]:
+        for roundNum in log[player][year]:
+            if year < year_target or (year == year_target and roundNum <= roundNum_target):
+                if log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0:
+                    if log[player][year][roundNum][-4] not in player_teams:
+                        player_teams.append((log[player][year][roundNum][-4], year, roundNum))
+
+    if len(player_teams) == 0:
+        return None
+    else:
+        curr_team = player_teams[0]
+        for team in player_teams:
+            if team[1] > curr_team[1] or (team[1] == curr_team[1] and team[2] > curr_team[2]):
+                curr_team = team
+        return curr_team[0]
+
+
 def write_data_to_file():
     out_file = open('scoresExtractedData.csv', 'w')
 
@@ -304,7 +323,12 @@ def write_data_to_file():
                     out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum]['acc_goals']) + ',' +
                                    '{:.2f}'.format(teams[team][year][roundNum]['tak_goals']) + ',NA')
                 else:
-                    out_file.write(',NA,NA,NA,NA,NA')
+                    team = get_player_team(player, year, roundNum)
+                    if team is None or teams[team].get(year) is None:
+                        out_file.write(',NA,NA,0.0,0.0,NA')
+                    else:
+                        out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum]['acc_goals']) + ',' +
+                                       '{:.2f}'.format(teams[team][year][roundNum]['tak_goals']) + ',NA')
 
                 out_file.write('\n')
     out_file.close()
