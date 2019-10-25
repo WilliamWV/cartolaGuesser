@@ -142,6 +142,8 @@ class DirReader:
 
     def build_log(self):
         global log, teams
+        year_log = {}
+        team_log = {}
         for file in self.files:
             file_handler = open(file, 'r', encoding='utf-8')
             print('Reading file: ' + file)
@@ -161,14 +163,14 @@ class DirReader:
                     playing_teams.append(team)
                     team_goals[team] = [0.0, 0.0]
 
-                if log.get(player_id) is None:
-                    log[player_id] = {}
-                if log[player_id].get(self.year) is None:
-                    log[player_id][self.year] = {}
-                if log[player_id][self.year].get(round_num) is None:
-                    log[player_id][self.year][round_num] = []
+                if year_log.get(player_id) is None:
+                    year_log[player_id] = {}
+                if year_log[player_id].get(self.year) is None:
+                    year_log[player_id][self.year] = {}
+                if year_log[player_id][self.year].get(round_num) is None:
+                    year_log[player_id][self.year][round_num] = []
 
-                if played_this_round and len(log[player_id][self.year][round_num]) == 0:
+                if played_this_round and len(year_log[player_id][self.year][round_num]) == 0:
                     for feature in [self.A, self.CA, self.CV, self.DD, self.DP, self.FC, self.FD, self.FF, self.FS,
                                     self.FT, self.G, self.GC, self.GS, self.IMP, self.PE, self.PP, self.RB, self.SG]:
                         if feature == -1 or line[feature] == 'NA':
@@ -176,28 +178,74 @@ class DirReader:
                         else:
                             feature_val = float(line[feature])
 
-                        log[player_id][self.year][round_num].append(feature_val)
+                        year_log[player_id][self.year][round_num].append(feature_val)
 
                     if line[self.G] != 'NA':
                         team_goals[team][0] += float(line[self.G])
                     if line[self.GS] != 'NA':
                         team_goals[team][1] += float(line[self.GS])
 
-                    log[player_id][self.year][round_num].append(team)
-                    log[player_id][self.year][round_num].append(float(line[self.PONTOS]))
-                    log[player_id][self.year][round_num].append(line[self.POS])
-                    log[player_id][self.year][round_num].append(float(line[self.PRECO]))
+                    year_log[player_id][self.year][round_num].append(team)
+                    year_log[player_id][self.year][round_num].append(float(line[self.PONTOS]))
+                    year_log[player_id][self.year][round_num].append(line[self.POS])
+                    year_log[player_id][self.year][round_num].append(float(line[self.PRECO]))
 
             for team in team_goals:
-                if teams.get(team) is None:
-                    teams[team] = {}
-                if teams[team].get(self.year) is None:
-                    teams[team][self.year] = {}
-                if teams[team][self.year].get(round_num) is None:
-                    teams[team][self.year][round_num] = {'goals_scored': team_goals[team][0],
+                if team_log.get(team) is None:
+                    team_log[team] = {}
+                if team_log[team].get(self.year) is None:
+                    team_log[team][self.year] = {}
+                if team_log[team][self.year].get(round_num) is None:
+                    team_log[team][self.year][round_num] = {'goals_scored': team_goals[team][0],
                                                          'goals_taken': team_goals[team][1]}
 
             file_handler.close()
+
+        for player_id in year_log:
+            for year in year_log[player_id]:
+                rounds = list(year_log[player_id][year].keys())
+                rounds.sort()
+                last_round = 0
+                for round_num in rounds:
+                    if log.get(player_id) is None:
+                        log[player_id] = {}
+                    if log[player_id].get(year) is None:
+                        log[player_id][year] = {}
+                    if log[player_id][year].get(round_num) is None:
+                        log[player_id][year][round_num] = []
+                    if last_round == 0:
+                        log[player_id][year][round_num] = year_log[player_id][year][round_num]
+                    else:
+                        log[player_id][year][round_num] = \
+                            [
+                                year_log[player_id][year][round_num][i] -
+                                year_log[player_id][year][last_round][i]
+                                for i in range(len(year_log[player_id][year][round_num]) - 4)
+                            ]
+                        for item in year_log[player_id][year][round_num][-4:]:
+                            log[player_id][year][round_num].append(item)
+                    last_round = round_num
+
+        for team in team_log:
+            for year in team_log[team]:
+                rounds = list(team_log[team][year].keys())
+                rounds.sort()
+                last_round = 0
+                for round_num in rounds:
+                    if teams.get(team) is None:
+                        teams[team] = {}
+                    if teams[team].get(year) is None:
+                        teams[team][year] = {}
+                    if teams[team][year].get(round_num) is None:
+                        teams[team][year][round_num] = {}
+                    if last_round == 0:
+                        teams[team][year][round_num] = team_log[team][year][round_num]
+                    else:
+                        teams[team][year][round_num] = {
+                            'goals_scored': team_log[team][year][round_num]['goals_scored'] - team_log[team][year][last_round]['goals_scored'],
+                            'goals_taken': team_log[team][year][round_num]['goals_taken'] - team_log[team][year][last_round]['goals_taken']
+                        }
+                    last_round = round_num
 
 
 def parse_input():
