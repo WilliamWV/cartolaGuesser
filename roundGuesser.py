@@ -7,6 +7,13 @@ import pandas as pd
 import numpy as np
 
 model_names = {}
+max_players_same_pos = {
+    'gol': 1,
+    'lat': 2,
+    'zag': 3,
+    'mei': 5,
+    'ata': 3
+}
 email = None
 password = None
 history = None
@@ -39,9 +46,9 @@ def parse_models():
 
     mod = []
     for path in pred_models:
-        model = read_model(path)
-        model_names[model] = path.replace('.h5', '')
-        mod.append(model)
+        inp_model = read_model(path)
+        model_names[inp_model] = path.replace('.h5', '')
+        mod.append(inp_model)
 
     return mod
 
@@ -73,7 +80,11 @@ def build_player_line(player_id, round_num):
         player_line = np.concatenate([player_vals[:-4], player_vals[-3:]])
         api = cartolafc.Api()
         api.set_credentials(email, password)
-        price = [round_score.preco for round_score in api.pontuacao_atleta(player_id) if round_score.rodada_id == round_num]
+        price = [
+            round_score.preco
+            for round_score in api.pontuacao_atleta(player_id)
+            if round_score.rodada_id == round_num
+        ]
         if len(price) != 1:
             print("ERROR: could not get the price of player " + str(player_id))
             return None
@@ -82,24 +93,56 @@ def build_player_line(player_id, round_num):
             return player_line, player_id
 
 
-def predict_players_score(player_lines, model):
-    scores = {}
+def predict_players_score(player_lines, trained_model):
+    players_scores = {}
     for player_line in player_lines:
         line = player_line[0]
         player_id = player_line[1]
         tensor = tf.convert_to_tensor(line.reshape((1, 22)), np.float32)
-        score = model.predict(tensor).tolist()[0][0]
-        scores[player_id] = score
+        score = trained_model.predict(tensor).tolist()[0][0]
+        players_scores[player_id] = score
 
-    return scores
+    return players_scores
 
 
 def choose_coach(model):
     pass
 
 
-def mount_team():
-    pass
+def get_highest_scores(players_scores, num_players):
+    items = players_scores.items
+    score_vals = [item[1] for item in items]
+    arr = np.array(score_vals)
+    highest_indexes = arr.argsort[-num_players:][::-1]
+    return [items[ind] for ind in highest_indexes]
+
+
+def get_suggestions(players_scores, pos):
+
+    # Each model generates a list with the highest predicted score
+    # this list will contains the maximum possible number of player from the same position
+    # playing together, that is:
+    # gol  ->  1
+    # lat  ->  2
+    # zag  ->  3
+    # mei  ->  5
+    # ata  ->  3
+
+    max_players = max_players_same_pos[pos]
+    return get_highest_scores(players_scores, max_players)
+
+
+def get_model_position(model_structure):
+    if model_names[model_structure].find('ata') >= 0:
+        return 'ata'
+    if model_names[model_structure].find('mei') >= 0:
+        return 'mei'
+    if model_names[model_structure].find('zag') >= 0:
+        return 'zag'
+    if model_names[model_structure].find('lat') >= 0:
+        return 'lat'
+    if model_names[model_structure].find('gol') >= 0:
+        return 'gol'
 
 
 if __name__ == '__main__':
@@ -109,45 +152,25 @@ if __name__ == '__main__':
     players = get_players()
     history = read_history(current_year, current_round)
 
-    ata_lines = []
-    mei_lines = []
-    zag_lines = []
-    lat_lines = []
-    gol_lines = []
+    lines = {}
 
     for player in players:
-        ata_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'ata']
-        mei_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'mei']
-        zag_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'zag']
-        lat_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'lat']
-        gol_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'gol']
+        lines['ata'] = [build_player_line(player[0], current_round) for player in players if player[1] == 'ata']
+        lines['mei'] = [build_player_line(player[0], current_round) for player in players if player[1] == 'mei']
+        lines['zag'] = [build_player_line(player[0], current_round) for player in players if player[1] == 'zag']
+        lines['lat'] = [build_player_line(player[0], current_round) for player in players if player[1] == 'lat']
+        lines['gol'] = [build_player_line(player[0], current_round) for player in players if player[1] == 'gol']
 
-    ata_lines = [line for line in ata_lines if line is not None]
-    mei_lines = [line for line in mei_lines if line is not None]
-    zag_lines = [line for line in zag_lines if line is not None]
-    lat_lines = [line for line in lat_lines if line is not None]
-    gol_lines = [line for line in gol_lines if line is not None]
+    lines['ata'] = [line for line in lines['ata'] if line is not None]
+    lines['mei'] = [line for line in lines['mei'] if line is not None]
+    lines['zag'] = [line for line in lines['zag'] if line is not None]
+    lines['lat'] = [line for line in lines['lat'] if line is not None]
+    lines['gol'] = [line for line in lines['gol'] if line is not None]
 
-    ata_models = [model for model in models if model_names[model].find('ata') >= 0]
-    mei_models = [model for model in models if model_names[model].find('mei') >= 0]
-    zag_models = [model for model in models if model_names[model].find('zag') >= 0]
-    lat_models = [model for model in models if model_names[model].find('lat') >= 0]
-    gol_models = [model for model in models if model_names[model].find('gol') >= 0]
+    suggestions = {}
 
-    ata_scores = {}
-    mei_scores = {}
-    zag_scores = {}
-    lat_scores = {}
-    gol_scores = {}
-
-    for model in ata_models:
-        ata_scores[model] = predict_players_score(ata_lines, model)
-    for model in mei_models:
-        mei_scores[model] = predict_players_score(mei_lines, model)
-    for model in zag_models:
-        zag_scores[model] = predict_players_score(zag_lines, model)
-    for model in lat_models:
-        lat_scores[model] = predict_players_score(lat_lines, model)
-    for model in gol_models:
-        gol_scores[model] = predict_players_score(gol_lines, model)
+    for model in models:
+        position = get_model_position(model)
+        scores = predict_players_score(lines[position], model)
+        suggestions[model] = get_suggestions(scores, position)
 
