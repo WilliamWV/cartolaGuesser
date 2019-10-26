@@ -4,8 +4,11 @@ import os
 import tensorflow as tf
 import cartolafc
 import pandas as pd
+import numpy as np
 
 model_names = {}
+email = None
+password = None
 history = None
 
 
@@ -14,11 +17,19 @@ def read_model(model_path):
 
 
 def parse_models():
+    global email, password
     parser = argparse.ArgumentParser(description='Receive models to use on prediction')
     parser.add_argument('-m', '--model', required=False, help='Path to saved model, if nothing is passed will train '
                                                               'with all models from \'/models\'')
 
+    parser.add_argument('-e' '--email', required=True,
+                        help='Registered email on cartola, used to get price of the players')
+    parser.add_argument('-p' '--password', required=True,
+                        help='Registered password on cartola, used to get price of the players')
+
     args = parser.parse_args()
+    email = args.email
+    password = args.password
     pred_models = []
     if args.model is None:
         for item in os.listdir('models'):
@@ -49,18 +60,28 @@ def read_history(year, round_num):
     return round_data
 
 
-def build_player_line(player):
-    global history
-    player_id = player[0]
-    player_pos = player[1]
-    player_row = history.loc[history['PlayerID'] == 85930]
+def build_player_line(player_id, round_num):
+    global history, email, password
+    player_row = history.loc[history['PlayerID'] == player_id]
     if len(player_row > 1):
         print("ERROR: Multiple lines of the same player")
-        exit()
+        return None
     elif len(player_row) == 0:
-        pass
+        return None
     else:
         player_vals = player_row.values[0][3:-1]
+        player_line = np.concatenate([player_vals[:-4], player_vals[-3:]])
+        api = cartolafc.Api()
+        api.set_credentials(email, password)
+        price = [round_score.preco for round_score in api.pontuacao_atleta(player_id) if round_score.rodada_id == round_num]
+        if len(price) != 1:
+            print("ERROR: could not get the price of player " + str(player_id))
+            return None
+        else:
+            player_line[-3] = price[0]
+            return player_line
+
+
 
 
 def predict_player_score(player, model):
@@ -80,5 +101,22 @@ if __name__ == '__main__':
     models = parse_models()
     players = get_players()
     history = read_history(current_year, current_round)
-    player_lines = [build_player_line(player) for player in players]
+
+    ata_lines = []
+    mei_lines = []
+    zag_lines = []
+    lat_lines = []
+    gol_lines = []
+
+    for player in players:
+        ata_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'ata']
+        mei_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'mei']
+        zag_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'zag']
+        lat_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'lat']
+        gol_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'gol']
+
+    for player_set in [ata_lines, mei_lines, zag_lines, lat_lines, gol_lines]:
+        player_set = [line for line in player_set if line is not None]
+
+    valid_players = [line for line in player_lines if line is not None]
     teams = [mount_team(model) for model in models]
