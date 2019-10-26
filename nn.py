@@ -4,7 +4,6 @@ import os
 
 import pandas as pd
 import tensorflow as tf
-from tensorflow import keras
 
 datasets = [
     ('train/scoresAta_train.csv', 'test/scoresAta_test.csv'),
@@ -22,7 +21,9 @@ dataset_abbr = {
     'train/scoresGol_train.csv': 'gol',
 }
 
-EPOCHS = 200
+EPOCHS = 50
+LOG_DIR = "logs\\fit_saved_08\\"
+MODELS_DIR = 'models_08\\'
 
 
 class Model:
@@ -35,10 +36,10 @@ class Model:
         self.test_dataset = test_tuple[0]
         self.test_target = test_tuple[1]
         similar_items = 0
-        for item in os.listdir('logs/fit_saved'):
+        for item in os.listdir(LOG_DIR):
             if item.find(self.name) >= 0:
                 similar_items += 1
-        log_dir = "logs\\fit_saved\\" + self.name
+        log_dir = LOG_DIR + self.name
         if similar_items > 0:
             log_dir += '_' + str(similar_items)
 
@@ -57,7 +58,7 @@ class Model:
 
     def save(self, abbr):
         similar_items = 0
-        for item in os.listdir('models'):
+        for item in os.listdir(MODELS_DIR):
             if item.find(self.name) >= 0:
                 similar_items += 1
 
@@ -66,7 +67,7 @@ class Model:
         else:
             file_name = self.name + '_' + abbr + '.h5'
 
-        self.model.save('models/' + file_name)
+        self.model.save(MODELS_DIR + file_name)
 
 
 def read_data(train_dataset, test_dataset):
@@ -100,16 +101,6 @@ def build_models(train_tuple, test_tuple, abbr):
     ])
     models.append(Model(temp_model, "64x64_noreg_" + abbr, train_tuple, test_tuple))
 
-    # 64x64 L2 regularization
-
-    temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
-        tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=keras.regularizers.l2(0.001)),
-        tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=keras.regularizers.l2(0.001)),
-        tf.keras.layers.Dense(1)
-    ])
-    models.append(Model(temp_model, "64x64_L2_" + abbr, train_tuple, test_tuple))
-
     # 64x64 Dropout = 0.2
     temp_model = tf.keras.models.Sequential([
         tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
@@ -129,19 +120,6 @@ def build_models(train_tuple, test_tuple, abbr):
         tf.keras.layers.Dense(1)
     ])
     models.append(Model(temp_model, "512_dropout_05_" + abbr, train_tuple, test_tuple))
-
-    # 32x32x32 Dropout = 0.5
-    temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
-        tf.keras.layers.Dense(32, activation='relu'),
-        tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(32, activation='relu'),
-        tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(32, activation='relu'),
-        tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(1)
-    ])
-    models.append(Model(temp_model, "32x32x32_dropout_05_" + abbr, train_tuple, test_tuple))
 
     # 512 Dropout = 0.2
     temp_model = tf.keras.models.Sequential([

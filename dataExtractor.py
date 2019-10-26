@@ -9,7 +9,7 @@ teams = {}
 
 ROUNDS = 38
 ATTRIBUTES = 18
-DECAY = 0.5
+DECAY = 0.8
 
 
 class FileReader:
@@ -197,7 +197,7 @@ class DirReader:
                     team_log[team][self.year] = {}
                 if team_log[team][self.year].get(round_num) is None:
                     team_log[team][self.year][round_num] = {'goals_scored': team_goals[team][0],
-                                                         'goals_taken': team_goals[team][1]}
+                                                            'goals_taken': team_goals[team][1]}
 
             file_handler.close()
 
@@ -242,8 +242,10 @@ class DirReader:
                         teams[team][year][round_num] = team_log[team][year][round_num]
                     else:
                         teams[team][year][round_num] = {
-                            'goals_scored': team_log[team][year][round_num]['goals_scored'] - team_log[team][year][last_round]['goals_scored'],
-                            'goals_taken': team_log[team][year][round_num]['goals_taken'] - team_log[team][year][last_round]['goals_taken']
+                            'goals_scored': team_log[team][year][round_num]['goals_scored'] -
+                                            team_log[team][year][last_round]['goals_scored'],
+                            'goals_taken': team_log[team][year][round_num]['goals_taken'] -
+                                           team_log[team][year][last_round]['goals_taken']
                         }
                     last_round = round_num
 
