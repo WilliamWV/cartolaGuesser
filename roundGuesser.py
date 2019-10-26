@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 
 model_names = {}
+teams_score = {}
 max_players_same_pos = {
     'gol': 1,
     'lat': 2,
@@ -61,7 +62,7 @@ def get_players():
 
 def read_history(year, round_num):
     history_file = 'scoresExtractedData.csv'
-    data = pd.read_csv(history_file, header=0, delimiter=',')
+    data = pd.read_csv(history_file, header=0, delimiter=',', encoding='ISO-8859-1')
     year_data = data[data["Year"] == year]
     round_data = year_data[year_data["Round"] == round_num - 1]
     return round_data
@@ -76,7 +77,8 @@ def build_player_line(player_id, round_num):
     elif len(player_row) == 0:
         return None
     else:
-        player_vals = player_row.values[0][3:-1]
+        player_team = player_row.values[3]
+        player_vals = player_row.values[0][4:-1]
         player_line = np.concatenate([player_vals[:-4], player_vals[-3:]])
         api = cartolafc.Api()
         api.set_credentials(email, password)
@@ -90,7 +92,7 @@ def build_player_line(player_id, round_num):
             return None
         else:
             player_line[-3] = price[0]
-            return player_line, player_id
+            return player_line, player_id, player_team
 
 
 def predict_players_score(player_lines, trained_model):
@@ -98,15 +100,19 @@ def predict_players_score(player_lines, trained_model):
     for player_line in player_lines:
         line = player_line[0]
         player_id = player_line[1]
+        player_team = player_line[2]
         tensor = tf.convert_to_tensor(line.reshape((1, 22)), np.float32)
         score = trained_model.predict(tensor).tolist()[0][0]
         players_scores[player_id] = score
+        if teams_score.get(player_team) is None:
+            teams_score[player_team] = 0.0
 
+        teams_score[player_team] += score
     return players_scores
 
 
-def choose_coach(model):
-    pass
+def suggest_coach():
+    return [c for c in teams_score if teams_score[c] == max(teams_score.values())]
 
 
 def get_highest_scores(players_scores, num_players):
@@ -174,3 +180,4 @@ if __name__ == '__main__':
         scores = predict_players_score(lines[position], model)
         suggestions[model] = get_suggestions(scores, position)
 
+    coach_suggestions = suggest_coach()

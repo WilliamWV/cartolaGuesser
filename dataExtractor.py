@@ -351,7 +351,7 @@ def write_data_to_file():
     out_file = open('scoresExtractedData.csv', 'w')
 
     out_file.write(
-        'PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
+        'PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
         'consGoals,realScore\n'
     )
 
@@ -359,21 +359,25 @@ def write_data_to_file():
         for year in log[player]:
             for roundNum in range(ROUNDS):
                 out_file.write(str(player) + ',' + str(year) + ',' + str(roundNum))
+                if log[player][year].get(roundNum + 1) is not None and len(log[player][year][roundNum + 1]) > 0:
+                    team = log[player][year][roundNum + 1][-4]
+                elif log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0:
+                    team = log[player][year][roundNum][-4]
+                else:
+                    team = get_player_team(player, year, roundNum)
+                out_file.write(','+str(team))
                 for item in scores[player][year][roundNum]:
                     out_file.write(',' + '{:.2f}'.format(item))
                 if log[player][year].get(roundNum + 1) is not None and len(log[player][year][roundNum + 1]) > 0:
-                    team = log[player][year][roundNum + 1][-4]
                     out_file.write(',' + str(log[player][year][roundNum + 1][-2]) + ',' + str(
                         log[player][year][roundNum + 1][-1]) +
                                    ',' + '{:.2f}'.format(teams[team][year][roundNum]['acc_goals']) + ',' +
                                    '{:.2f}'.format(teams[team][year][roundNum]['tak_goals']) + ',' +
                                    str(log[player][year][roundNum + 1][-3]))
                 elif log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0:
-                    team = log[player][year][roundNum][-4]
                     out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum]['acc_goals']) + ',' +
                                    '{:.2f}'.format(teams[team][year][roundNum]['tak_goals']) + ',NA')
                 else:
-                    team = get_player_team(player, year, roundNum)
                     if team is None or teams[team].get(year) is None:
                         out_file.write(',NA,NA,0.0,0.0,NA')
                     else:
@@ -388,7 +392,7 @@ def filter_file():
     in_file = open('scoresExtractedData.csv', 'r')
     out_file = open('scoresExtractedFiltered.csv', 'w')
     for line in in_file.readlines():
-        if line.find('NA') < 0:
+        if line.find('NA,') < 0:
             out_file.write(line)
     in_file.close()
     out_file.close()
@@ -404,7 +408,7 @@ def split_file():
 
     for out_file in [gol_file, zag_file, lat_file, mei_file, ata_file]:
         out_file.write(
-            'PlayerID,Year,Round,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
+            'PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
             'consGoals,realScore\n'
         )
 
@@ -428,18 +432,18 @@ def write_nn_file(in_file_path):
     train_percent = 0.7
     first_line = True
     for line in in_file.readlines():
-        third_comma_pos = line.find(',', line.find(',', line.find(',') + 1) + 1)
+        fourth_comma_pos = line.find(',', line.find(',', line.find(',', line.find(',') + 1) + 1) + 1)
         line = line.replace('zag,', '').replace('mei,', '').replace('lat,', '').replace('gol,', '') \
             .replace('ata,', '').replace('pos,', '')
         if first_line:
-            train_file.write(line[third_comma_pos + 1:])
-            test_file.write(line[third_comma_pos + 1:])
+            train_file.write(line[fourth_comma_pos + 1:])
+            test_file.write(line[fourth_comma_pos + 1:])
             first_line = False
         else:
             if random.random() <= train_percent:
-                train_file.write(line[third_comma_pos + 1:])
+                train_file.write(line[fourth_comma_pos + 1:])
             else:
-                test_file.write(line[third_comma_pos + 1:])
+                test_file.write(line[fourth_comma_pos + 1:])
 
 
 if __name__ == '__main__':
