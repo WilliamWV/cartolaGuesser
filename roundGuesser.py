@@ -79,19 +79,26 @@ def build_player_line(player_id, round_num):
             return None
         else:
             player_line[-3] = price[0]
-            return player_line
+            return player_line, player_id
 
 
+def predict_players_score(player_lines, model):
+    scores = {}
+    for player_line in player_lines:
+        line = player_line[0]
+        player_id = player_line[1]
+        tensor = tf.convert_to_tensor(line.reshape((1, 22)), np.float32)
+        score = model.predict(tensor).tolist()[0][0]
+        scores[player_id] = score
 
-
-def predict_player_score(player, model):
-    pass
+    return scores
 
 
 def choose_coach(model):
     pass
 
-def mount_team(model):
+
+def mount_team():
     pass
 
 
@@ -115,8 +122,32 @@ if __name__ == '__main__':
         lat_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'lat']
         gol_lines = [build_player_line(player[0], current_round) for player in players if player[1] == 'gol']
 
-    for player_set in [ata_lines, mei_lines, zag_lines, lat_lines, gol_lines]:
-        player_set = [line for line in player_set if line is not None]
+    ata_lines = [line for line in ata_lines if line is not None]
+    mei_lines = [line for line in mei_lines if line is not None]
+    zag_lines = [line for line in zag_lines if line is not None]
+    lat_lines = [line for line in lat_lines if line is not None]
+    gol_lines = [line for line in gol_lines if line is not None]
 
-    valid_players = [line for line in player_lines if line is not None]
-    teams = [mount_team(model) for model in models]
+    ata_models = [model for model in models if model_names[model].find('ata') >= 0]
+    mei_models = [model for model in models if model_names[model].find('mei') >= 0]
+    zag_models = [model for model in models if model_names[model].find('zag') >= 0]
+    lat_models = [model for model in models if model_names[model].find('lat') >= 0]
+    gol_models = [model for model in models if model_names[model].find('gol') >= 0]
+
+    ata_scores = {}
+    mei_scores = {}
+    zag_scores = {}
+    lat_scores = {}
+    gol_scores = {}
+
+    for model in ata_models:
+        ata_scores[model] = predict_players_score(ata_lines, model)
+    for model in mei_models:
+        mei_scores[model] = predict_players_score(mei_lines, model)
+    for model in zag_models:
+        zag_scores[model] = predict_players_score(zag_lines, model)
+    for model in lat_models:
+        lat_scores[model] = predict_players_score(lat_lines, model)
+    for model in gol_models:
+        gol_scores[model] = predict_players_score(gol_lines, model)
+
