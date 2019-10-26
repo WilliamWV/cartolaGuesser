@@ -112,8 +112,10 @@ def predict_players_score(player_lines, trained_model):
 
 
 def suggest_coach():
-    return [c for c in teams_score if teams_score[c] == max(teams_score.values())]
-
+    suggested_teams = [c for c in teams_score if teams_score[c] == max(teams_score.values())]
+    players = cartolafc.Api().mercado_atletas()
+    coachs = [c for c in players if c.posicao[2] == 'tec']
+    return [c.id for c in coachs if c.clube.nome in suggested_teams]
 
 def get_highest_scores(players_scores, num_players):
     items = players_scores.items
