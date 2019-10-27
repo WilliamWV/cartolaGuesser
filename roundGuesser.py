@@ -69,7 +69,7 @@ def parse_models():
         for item in os.listdir(args.model_dir):
             inp_model = read_model(args.model_dir + '/' + item)
             model_names[inp_model] = item.replace('.h5', '')
-            mod.append(model)
+            mod.append(inp_model)
 
     else:
         print("You may either enter path to all models (-a, -m, -z, -l and -g) or to the model directory (-d)")
@@ -342,12 +342,13 @@ def print_team(team_to_print):
 
 
 if __name__ == '__main__':
+    api = cartolafc.Api()
+    mercado = api.mercado()
+    current_round = mercado.rodada_atual
+    current_year = mercado.fechamento.year
+
     print("Parsing models")
     models = parse_models()
-
-    current_round = cartolafc.Api().mercado().rodada_atual
-    current_year = cartolafc.Api().mercado().fechamento.year
-    api = cartolafc.Api()
     api.set_credentials(email, password)
 
     print("Running suggestions for year " + str(current_year) + " and round " + str(current_round))
