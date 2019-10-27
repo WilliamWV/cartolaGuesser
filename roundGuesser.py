@@ -137,8 +137,8 @@ def predict_players_score(player_lines, trained_model):
 
 def suggest_coach():
     suggested_teams = [c for c in teams_score if teams_score[c] == max(teams_score.values())]
-    players = cartolafc.Api().mercado_atletas()
-    coachs = [c for c in players if c.posicao[2] == 'tec']
+    all_players = cartolafc.Api().mercado_atletas()
+    coachs = [c for c in all_players if c.posicao[2] == 'tec']
     return [c.id for c in coachs if c.clube.nome in suggested_teams]
 
 
@@ -177,6 +177,51 @@ def get_model_position(model_structure):
         return 'gol'
 
 
+def build_team(models_suggestions, formation, ata_model, mei_model, zag_model, lat_model, gol_model):
+    team = {
+        'gol': models_suggestions[gol_model],
+        'lat': models_suggestions[lat_model][:formation[0]],
+        'zag': models_suggestions[zag_model][:formation[1]],
+        'mei': models_suggestions[mei_model][:formation[2]],
+        'ata': models_suggestions[ata_model][:formation[3]]
+    }
+    team_score = sum([sum([score[1] for score in pos_players]) for pos_players in team.values()])
+
+    return team, team_score, formation
+
+
+def suggest_team(models_suggestions):
+    team_formations = [
+        (0, 3, 4, 3),  # 3-4-3
+        (0, 3, 5, 2),  # 3-5-2
+        (2, 2, 3, 3),  # 4-3-3
+        (2, 2, 4, 2),  # 4-4-2
+        (2, 2, 5, 1),  # 4-5-1
+        (2, 3, 3, 2),  # 5-3-2
+        (2, 3, 4, 1)  # 5-4-1
+    ]
+
+    ata_models = [sug_model for sug_model in models_suggestions.keys() if model_names[sug_model].find('ata') >= 0]
+    mei_models = [sug_model for sug_model in models_suggestions.keys() if model_names[sug_model].find('mei') >= 0]
+    zag_models = [sug_model for sug_model in models_suggestions.keys() if model_names[sug_model].find('zag') >= 0]
+    lat_models = [sug_model for sug_model in models_suggestions.keys() if model_names[sug_model].find('lat') >= 0]
+    gol_models = [sug_model for sug_model in models_suggestions.keys() if model_names[sug_model].find('gol') >= 0]
+
+    if len(ata_models) == 1 and len(mei_models) == 1 and len(zag_models) == 1 and len(lat_models) == 1 and len(
+            gol_models) == 1:
+        ata_model = ata_models[0]
+        mei_model = mei_models[0]
+        zag_model = zag_models[0]
+        lat_model = lat_models[0]
+        gol_model = gol_models[0]
+        possible_teams = [
+            build_team(models_suggestions, formation, ata_model, mei_model, zag_model, lat_model, gol_model) for
+            formation in team_formations]
+        max_score = max([team[1] for team in possible_teams])
+        optimal_team = [team for team in possible_teams if team[1] == max_score]
+        return optimal_team
+
+
 if __name__ == '__main__':
     current_round = cartolafc.Api().mercado().rodada_atual
     current_year = cartolafc.Api().mercado().fechamento.year
@@ -205,5 +250,7 @@ if __name__ == '__main__':
         position = get_model_position(model)
         scores = predict_players_score(lines[position], model)
         suggestions[model] = get_suggestions(scores, position)
+
+    suggest_team(suggestions)
 
     coach_suggestions = suggest_coach()
