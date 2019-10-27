@@ -34,9 +34,9 @@ def parse_models():
 
     parser.add_argument('-d', '--model_dir', required=False, help='Path to models directory')
 
-    parser.add_argument('-e' '--email', required=True,
+    parser.add_argument('-e', '--email', required=True,
                         help='Registered email on cartola, used to get price of the players')
-    parser.add_argument('-p' '--password', required=True,
+    parser.add_argument('-p', '--password', required=True,
                         help='Registered password on cartola, used to get price of the players')
 
     args = parser.parse_args()
@@ -89,27 +89,28 @@ def read_history(year, round_num):
     data = pd.read_csv(history_file, header=0, delimiter=',', encoding='ISO-8859-1')
     year_data = data[data["Year"] == year]
     round_data = year_data[year_data["Round"] == round_num - 1]
+    print("Found " + str(len(round_data)) + " possible players")
     return round_data
 
 
-def build_player_line(player_id, round_num):
-    global history, email, password
+def build_player_line(player_id, round_num, api):
+    global history
+
+    print("Building input for player: " + [player.apelido for player in api.mercado_atletas() if player.id == player_id][0])
     player_row = history.loc[history['PlayerID'] == player_id]
-    if len(player_row > 1):
+    if len(player_row) > 1:
         print("ERROR: Multiple lines of the same player")
         return None
     elif len(player_row) == 0:
         return None
     else:
-        player_team = player_row.values[3]
+        player_team = player_row.values[0][3]
         player_vals = player_row.values[0][4:-1]
         player_line = np.concatenate([player_vals[:-4], player_vals[-3:]])
-        api = cartolafc.Api()
-        api.set_credentials(email, password)
         price = [
             round_score.preco
             for round_score in api.pontuacao_atleta(player_id)
-            if round_score.rodada_id == round_num
+            if round_score.rodada_id == round_num - 1
         ]
         if len(price) != 1:
             print("ERROR: could not get the price of player " + str(player_id))
@@ -143,10 +144,10 @@ def suggest_coach():
 
 
 def get_highest_scores(players_scores, num_players):
-    items = players_scores.items
-    score_vals = [item[1] for item in items]
+    items = list(players_scores.items())
+    score_vals = list(players_scores.values())
     arr = np.array(score_vals)
-    highest_indexes = arr.argsort[-num_players:][::-1]
+    highest_indexes = arr.argsort()[-num_players:][::-1]
     return [items[ind] for ind in highest_indexes]
 
 
@@ -198,10 +199,9 @@ def get_most_voteds(vote_list, num_classified):
         else:
             vote_log[item] += 1
 
-    items = list(vote_log.items())
-    votes_vals = [item[1] for item in items]
+    votes_vals = list(vote_log.values())
     arr = np.array(votes_vals)
-    highest_indexes = arr.argsort[-num_classified:][::-1]
+    highest_indexes = arr.argsort()[-num_classified:][::-1]
     voted_items = list(vote_log.keys())
     return [voted_items[ind] for ind in highest_indexes]
 
@@ -283,27 +283,30 @@ def suggest_team(models_suggestions):
 
 
 if __name__ == '__main__':
+    print("Parsing models")
+    models = parse_models()
+
     current_round = cartolafc.Api().mercado().rodada_atual
     current_year = cartolafc.Api().mercado().fechamento.year
-    models = parse_models()
+    api = cartolafc.Api()
+    api.set_credentials(email, password)
+
+    print("Running suggestions for year " + str(current_year) + " and round " + str(current_round))
+    print("Getting players of the round")
     players = get_players()
+    print("Calculating history of this round's players")
     history = read_history(current_year, current_round)
 
     lines = {}
+    print("Building player information for this round")
 
-    for player in players:
-        lines['ata'] = [build_player_line(player[0], current_round) for player in players if player[1] == 'ata']
-        lines['mei'] = [build_player_line(player[0], current_round) for player in players if player[1] == 'mei']
-        lines['zag'] = [build_player_line(player[0], current_round) for player in players if player[1] == 'zag']
-        lines['lat'] = [build_player_line(player[0], current_round) for player in players if player[1] == 'lat']
-        lines['gol'] = [build_player_line(player[0], current_round) for player in players if player[1] == 'gol']
+    lines['ata'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'ata'] if line is not None]
+    lines['mei'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'mei'] if line is not None]
+    lines['zag'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'zag'] if line is not None]
+    lines['lat'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'lat'] if line is not None]
+    lines['gol'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'gol'] if line is not None]
 
-    lines['ata'] = [line for line in lines['ata'] if line is not None]
-    lines['mei'] = [line for line in lines['mei'] if line is not None]
-    lines['zag'] = [line for line in lines['zag'] if line is not None]
-    lines['lat'] = [line for line in lines['lat'] if line is not None]
-    lines['gol'] = [line for line in lines['gol'] if line is not None]
-
+    print("Predicting players score")
     suggestions = {}
 
     for model in models:
@@ -311,6 +314,20 @@ if __name__ == '__main__':
         scores = predict_players_score(lines[position], model)
         suggestions[model] = get_suggestions(scores, position)
 
-    suggest_team(suggestions)
+    print("Calculating suggested team")
+    teams = suggest_team(suggestions)
+    for team in teams:
+        print("Team suggestion: ")
+        print("Formation: " + str(team[2]))
+        print("Gol: " + str(team[0]['gol']))
+        print("Lat: " + str(team[0]['lat']))
+        print("Zag: " + str(team[0]['zag']))
+        print("Mei: " + str(team[0]['mei']))
+        print("Ata: " + str(team[0]['ata']))
+        print("Expected score: " + str(team[1]))
 
+    print("Calculating suggested coach")
     coach_suggestions = suggest_coach()
+    for coach in coach_suggestions:
+        print('Coach suggestion: ')
+        print(coach)
