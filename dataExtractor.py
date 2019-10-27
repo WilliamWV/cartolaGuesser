@@ -9,7 +9,7 @@ teams = {}
 
 ROUNDS = 38
 ATTRIBUTES = 18
-DECAY = 0.8
+DECAY = 0.3
 
 
 class FileReader:
@@ -413,15 +413,15 @@ def split_file():
         )
 
     for line in in_file.readlines():
-        if line.find('gol') >= 0:
+        if line.find(',gol,') >= 0:
             gol_file.write(line)
-        elif line.find('zag') >= 0:
+        elif line.find(',zag,') >= 0:
             zag_file.write(line)
-        elif line.find('lat') >= 0:
+        elif line.find(',lat,') >= 0:
             lat_file.write(line)
-        elif line.find('mei') >= 0:
+        elif line.find(',mei,') >= 0:
             mei_file.write(line)
-        elif line.find('ata') >= 0:
+        elif line.find(',ata,') >= 0:
             ata_file.write(line)
 
 

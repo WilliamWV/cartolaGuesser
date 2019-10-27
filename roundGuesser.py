@@ -1,4 +1,3 @@
-
 import argparse
 import os
 import tensorflow as tf
@@ -27,8 +26,13 @@ def read_model(model_path):
 def parse_models():
     global email, password
     parser = argparse.ArgumentParser(description='Receive models to use on prediction')
-    parser.add_argument('-m', '--model', required=False, help='Path to saved model, if nothing is passed will train '
-                                                              'with all models from \'/models\'')
+    parser.add_argument('-a', '--ata_model', required=False)
+    parser.add_argument('-m', '--mei_model', required=False)
+    parser.add_argument('-z', '--zag_model', required=False)
+    parser.add_argument('-l', '--lat_model', required=False)
+    parser.add_argument('-g', '--gol_model', required=False)
+
+    parser.add_argument('-d', '--model_dir', required=False, help='Path to models directory')
 
     parser.add_argument('-e' '--email', required=True,
                         help='Registered email on cartola, used to get price of the players')
@@ -38,18 +42,38 @@ def parse_models():
     args = parser.parse_args()
     email = args.email
     password = args.password
-    pred_models = []
-    if args.model is None:
-        for item in os.listdir('models'):
-            pred_models.append('models/' + item)
-    else:
-        pred_models = [args.model]
-
     mod = []
-    for path in pred_models:
-        inp_model = read_model(path)
-        model_names[inp_model] = path.replace('.h5', '')
-        mod.append(inp_model)
+
+    if args.ata_model is not None or args.mei_model is not None or args.zag_model is not None or \
+            args.lat_model is not None or args.gol_model is not None:
+        if args.ata_model is None or args.mei_model is None or args.zag_model is None or \
+                args.lat_model is None or args.gol_model is None:
+            print("You may either enter path to all models (-a, -m, -z, -l and -g) or to the model directory (-d)")
+            exit()
+        else:
+            ata_model = read_model(args.ata_model)
+            mei_model = read_model(args.mei_model)
+            zag_model = read_model(args.zag_model)
+            lat_model = read_model(args.lat_model)
+            gol_model = read_model(args.gol_model)
+
+            model_names[ata_model] = 'ata'
+            model_names[mei_model] = 'mei'
+            model_names[zag_model] = 'zag'
+            model_names[lat_model] = 'lat'
+            model_names[gol_model] = 'gol'
+
+            mod = [ata_model, mei_model, zag_model, lat_model, gol_model]
+
+    elif args.model_dir is not None:
+        for item in os.listdir(args.model_dir):
+            inp_model = read_model(args.model_dir + '/' + item)
+            model_names[inp_model] = item.replace('.h5', '')
+            mod.append(model)
+
+    else:
+        print("You may either enter path to all models (-a, -m, -z, -l and -g) or to the model directory (-d)")
+        exit()
 
     return mod
 
@@ -117,6 +141,7 @@ def suggest_coach():
     coachs = [c for c in players if c.posicao[2] == 'tec']
     return [c.id for c in coachs if c.clube.nome in suggested_teams]
 
+
 def get_highest_scores(players_scores, num_players):
     items = players_scores.items
     score_vals = [item[1] for item in items]
@@ -126,7 +151,6 @@ def get_highest_scores(players_scores, num_players):
 
 
 def get_suggestions(players_scores, pos):
-
     # Each model generates a list with the highest predicted score
     # this list will contains the maximum possible number of player from the same position
     # playing together, that is:
