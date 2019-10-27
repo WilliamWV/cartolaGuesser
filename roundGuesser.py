@@ -190,6 +190,59 @@ def build_team(models_suggestions, formation, ata_model, mei_model, zag_model, l
     return team, team_score, formation
 
 
+def get_most_voteds(vote_list, num_classified):
+    vote_log = {}
+    for item in vote_list:
+        if vote_log.get(item) is None:
+            vote_log[item] = 1
+        else:
+            vote_log[item] += 1
+
+    items = list(vote_log.items())
+    votes_vals = [item[1] for item in items]
+    arr = np.array(votes_vals)
+    highest_indexes = arr.argsort[-num_classified:][::-1]
+    voted_items = list(vote_log.keys())
+    return [voted_items[ind] for ind in highest_indexes]
+
+
+def vote_team(models_suggestions, formation, ata_models, mei_models, zag_models, lat_models, gol_models):
+    voted_suggestions = {
+        'gol': [],
+        'lat': [],
+        'zag': [],
+        'mei': [],
+        'ata': []
+    }
+    for g_model in gol_models:
+        voted_suggestions['gol'].extend(models_suggestions[g_model])
+    for l_model in lat_models:
+        voted_suggestions['lat'].extend(models_suggestions[l_model])
+    for z_model in zag_models:
+        voted_suggestions['zag'].extend(models_suggestions[z_model])
+    for m_model in mei_models:
+        voted_suggestions['mei'].extend(models_suggestions[m_model])
+    for a_model in ata_models:
+        voted_suggestions['ata'].extend(models_suggestions[a_model])
+
+    gol_suggestions = get_most_voteds(voted_suggestions['gol'], max_players_same_pos['gol'])
+    lat_suggestions = get_most_voteds(voted_suggestions['lat'], max_players_same_pos['lat'])
+    zag_suggestions = get_most_voteds(voted_suggestions['zag'], max_players_same_pos['zag'])
+    mei_suggestions = get_most_voteds(voted_suggestions['mei'], max_players_same_pos['mei'])
+    ata_suggestions = get_most_voteds(voted_suggestions['ata'], max_players_same_pos['ata'])
+
+    team = {
+        'gol': gol_suggestions,
+        'lat': lat_suggestions[:formation[0]],
+        'zag': zag_suggestions[:formation[1]],
+        'mei': mei_suggestions[:formation[2]],
+        'ata': ata_suggestions[:formation[3]]
+    }
+    team_score = sum([sum([score[1] for score in pos_players]) for pos_players in team.values()])
+
+    return team, team_score, formation
+
+
 def suggest_team(models_suggestions):
     team_formations = [
         (0, 3, 4, 3),  # 3-4-3
@@ -216,6 +269,13 @@ def suggest_team(models_suggestions):
         gol_model = gol_models[0]
         possible_teams = [
             build_team(models_suggestions, formation, ata_model, mei_model, zag_model, lat_model, gol_model) for
+            formation in team_formations]
+        max_score = max([team[1] for team in possible_teams])
+        optimal_team = [team for team in possible_teams if team[1] == max_score]
+        return optimal_team
+    else:
+        possible_teams = [
+            vote_team(models_suggestions, formation, ata_models, mei_models, zag_models, lat_models, gol_models) for
             formation in team_formations]
         max_score = max([team[1] for team in possible_teams])
         optimal_team = [team for team in possible_teams if team[1] == max_score]
