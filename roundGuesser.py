@@ -138,9 +138,10 @@ def predict_players_score(player_lines, trained_model):
 
 def suggest_coach():
     suggested_teams = [c for c in teams_score if teams_score[c] == max(teams_score.values())]
+    score = teams_score[suggested_teams[0]] / 11.0
     all_players = cartolafc.Api().mercado_atletas()
     coachs = [c for c in all_players if c.posicao[2] == 'tec']
-    return [c.id for c in coachs if c.clube.nome in suggested_teams]
+    return [c.id for c in coachs if c.clube.nome in suggested_teams][0], score
 
 
 def get_highest_scores(players_scores, num_players):
@@ -271,19 +272,36 @@ def suggest_team(models_suggestions):
             build_team(models_suggestions, formation, ata_model, mei_model, zag_model, lat_model, gol_model) for
             formation in team_formations]
         max_score = max([team[1] for team in possible_teams])
-        optimal_team = [team for team in possible_teams if team[1] == max_score]
+        optimal_team = [team for team in possible_teams if team[1] == max_score][0]
         return optimal_team
     else:
         possible_teams = [
             vote_team(models_suggestions, formation, ata_models, mei_models, zag_models, lat_models, gol_models) for
             formation in team_formations]
         max_score = max([team[1] for team in possible_teams])
-        optimal_team = [team for team in possible_teams if team[1] == max_score]
+        optimal_team = [team for team in possible_teams if team[1] == max_score][0]
         return optimal_team
 
 
 def print_formation(formation):
+    print("\nEsquema tatico:")
     print(str(formation[0] + formation[1]) + '-' + str(formation[2]) + '-' + str(formation[3]))
+
+
+def choose_cap(team):
+    team_players = []
+    team_players.extend(team['gol'])
+    team_players.extend(team['lat'])
+    team_players.extend(team['zag'])
+    team_players.extend(team['mei'])
+    team_players.extend(team['ata'])
+
+    cap = team['gol'][0]
+    for player in team_players:
+        if player[1] > cap[1]:
+            cap = player
+
+    return cap
 
 
 def print_team(team_to_print):
@@ -356,15 +374,14 @@ if __name__ == '__main__':
         suggestions[model] = get_suggestions(scores, position)
 
     print("Calculating suggested team")
-    teams = suggest_team(suggestions)
-    for team in teams:
-        print("Team suggestion: ")
-        print_formation(team[2])
-        print_team(team[0])
-        print("Expected score: {:.2f}".format(team[1]))
+    team = suggest_team(suggestions)
+    coach_suggestion = suggest_coach()
 
-    print("Calculating suggested coach")
-    coach_suggestions = suggest_coach()
-    for coach in coach_suggestions:
-        print('Coach suggestion: ', end='')
-        print([player.apelido for player in api.mercado_atletas() if player.id == coach][0])
+    print("Team suggestion: ")
+    print_formation(team[2])
+    print_team(team[0])
+    cap = choose_cap(team[0])
+    print('Cap: ' + [player.apelido for player in api.mercado_atletas() if player.id == cap[0]][0])
+    print('Coach suggestion: ', end='')
+    print([player.apelido for player in api.mercado_atletas() if player.id == coach_suggestion[0]][0] + ':{:.2f}'.format(coach_suggestion[1]))
+    print("Expected score: {:.2f}".format(team[1] + cap[1] + coach_suggestion[1]))
