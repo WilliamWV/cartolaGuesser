@@ -282,6 +282,47 @@ def suggest_team(models_suggestions):
         return optimal_team
 
 
+def print_formation(formation):
+    print(str(formation[0] + formation[1]) + '-' + str(formation[2]) + '-' + str(formation[3]))
+
+
+def print_team(team_to_print):
+
+    print("\nGol: ")
+    for suggested_player in team_to_print['gol']:
+        print(
+            [player.apelido for player in api.mercado_atletas() if player.id == suggested_player[0]][0]
+            + ':' + '{:.2f}'.format(suggested_player[1])
+        )
+
+    print("\nLat: ")
+    for suggested_player in team_to_print['lat']:
+        print(
+            [player.apelido for player in api.mercado_atletas() if player.id == suggested_player[0]][0]
+            + ':' + '{:.2f}'.format(suggested_player[1])
+        )
+
+    print("\nZag: ")
+    for suggested_player in team_to_print['zag']:
+        print(
+            [player.apelido for player in api.mercado_atletas() if player.id == suggested_player[0]][0]
+            + ':' + '{:.2f}'.format(suggested_player[1])
+        )
+
+    print("\nMei: ")
+    for suggested_player in team_to_print['mei']:
+        print(
+            [player.apelido for player in api.mercado_atletas() if player.id == suggested_player[0]][0]
+            + ':' + '{:.2f}'.format(suggested_player[1])
+        )
+    print("\nAta: ")
+    for suggested_player in team_to_print['ata']:
+        print(
+            [player.apelido for player in api.mercado_atletas() if player.id == suggested_player[0]][0]
+            + ':' + '{:.2f}'.format(suggested_player[1])
+        )
+
+
 if __name__ == '__main__':
     print("Parsing models")
     models = parse_models()
@@ -318,16 +359,12 @@ if __name__ == '__main__':
     teams = suggest_team(suggestions)
     for team in teams:
         print("Team suggestion: ")
-        print("Formation: " + str(team[2]))
-        print("Gol: " + str(team[0]['gol']))
-        print("Lat: " + str(team[0]['lat']))
-        print("Zag: " + str(team[0]['zag']))
-        print("Mei: " + str(team[0]['mei']))
-        print("Ata: " + str(team[0]['ata']))
-        print("Expected score: " + str(team[1]))
+        print_formation(team[2])
+        print_team(team[0])
+        print("Expected score: {:.2f}".format(team[1]))
 
     print("Calculating suggested coach")
     coach_suggestions = suggest_coach()
     for coach in coach_suggestions:
-        print('Coach suggestion: ')
-        print(coach)
+        print('Coach suggestion: ', end='')
+        print([player.apelido for player in api.mercado_atletas() if player.id == coach][0])
