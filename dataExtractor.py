@@ -352,7 +352,7 @@ def write_data_to_file():
 
     out_file.write(
         'PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
-        'consGoals,realScore\n'
+        'consGoals,advPG,advCG,realScore\n'
     )
 
     for player in scores:
