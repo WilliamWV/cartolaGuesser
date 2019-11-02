@@ -24,6 +24,7 @@ dataset_abbr = {
 EPOCHS = 50
 LOG_DIR = "logs\\fit_saved_03\\"
 MODELS_DIR = 'models\\03\\'
+INPUT_VALS = 24
 
 
 class Model:
@@ -83,7 +84,7 @@ def build_models(train_tuple, test_tuple, abbr):
     models = []
     # 64x64 Dropout = 0.5
     temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(INPUT_VALS, activation='relu', input_shape=[INPUT_VALS]),
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(64, activation='relu'),
@@ -94,7 +95,7 @@ def build_models(train_tuple, test_tuple, abbr):
 
     # 64x64 No regularization
     temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(INPUT_VALS, activation='relu', input_shape=[INPUT_VALS]),
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dense(1)
@@ -103,7 +104,7 @@ def build_models(train_tuple, test_tuple, abbr):
 
     # 64x64 Dropout = 0.2
     temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(INPUT_VALS, activation='relu', input_shape=[INPUT_VALS]),
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(64, activation='relu'),
@@ -114,7 +115,7 @@ def build_models(train_tuple, test_tuple, abbr):
 
     # 512 Dropout = 0.5
     temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(INPUT_VALS, activation='relu', input_shape=[INPUT_VALS]),
         tf.keras.layers.Dense(512, activation='relu'),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(1)
@@ -123,7 +124,7 @@ def build_models(train_tuple, test_tuple, abbr):
 
     # 512 Dropout = 0.2
     temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(INPUT_VALS, activation='relu', input_shape=[INPUT_VALS]),
         tf.keras.layers.Dense(512, activation='relu'),
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(1)
@@ -131,7 +132,7 @@ def build_models(train_tuple, test_tuple, abbr):
     models.append(Model(temp_model, "512_dropout_02_" + abbr, train_tuple, test_tuple))
 
     temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(INPUT_VALS, activation='relu', input_shape=[INPUT_VALS]),
         tf.keras.layers.Dense(256, activation='relu'),
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(128, activation='relu'),
@@ -141,7 +142,7 @@ def build_models(train_tuple, test_tuple, abbr):
     models.append(Model(temp_model, "256x128_dropout_02_" + abbr, train_tuple, test_tuple))
 
     temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(INPUT_VALS, activation='relu', input_shape=[INPUT_VALS]),
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(64, activation='relu'),
@@ -153,7 +154,7 @@ def build_models(train_tuple, test_tuple, abbr):
     models.append(Model(temp_model, "128x64x32_dropout_02_" + abbr, train_tuple, test_tuple))
 
     temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(INPUT_VALS, activation='relu', input_shape=[INPUT_VALS]),
         tf.keras.layers.Dense(256, activation='relu'),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(128, activation='relu'),
@@ -163,7 +164,7 @@ def build_models(train_tuple, test_tuple, abbr):
     models.append(Model(temp_model, "256x128_dropout_05_" + abbr, train_tuple, test_tuple))
 
     temp_model = tf.keras.models.Sequential([
-        tf.keras.layers.Dense(22, activation='relu', input_shape=[22]),
+        tf.keras.layers.Dense(INPUT_VALS, activation='relu', input_shape=[INPUT_VALS]),
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(64, activation='relu'),
