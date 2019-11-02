@@ -106,7 +106,7 @@ def build_player_line(player_id, round_num, api):
     else:
         player_team = player_row.values[0][3]
         player_vals = player_row.values[0][4:-1]
-        player_line = np.concatenate([player_vals[:-4], player_vals[-3:]])
+        player_line = np.concatenate([player_vals[:-6], player_vals[-5:]])
         price = [
             round_score.preco
             for round_score in api.pontuacao_atleta(player_id)
@@ -126,7 +126,7 @@ def predict_players_score(player_lines, trained_model):
         line = player_line[0]
         player_id = player_line[1]
         player_team = player_line[2]
-        tensor = tf.convert_to_tensor(line.reshape((1, 22)), np.float32)
+        tensor = tf.convert_to_tensor(line.reshape((1, 24)), np.float32)
         score = trained_model.predict(tensor).tolist()[0][0]
         players_scores[player_id] = score
         if teams_score.get(player_team) is None:
