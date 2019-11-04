@@ -10,7 +10,7 @@ teams = {}
 
 ROUNDS = 38
 ATTRIBUTES = 18
-DECAY = 0.5
+DECAY = 0.3
 
 
 class FileReader:
