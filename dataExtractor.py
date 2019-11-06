@@ -10,7 +10,6 @@ teams = {}
 
 ROUNDS = 38
 ATTRIBUTES = 18
-DECAY = 0.3
 
 
 class FileReader:
@@ -190,6 +189,16 @@ class DirReader:
                     last_round = round_num
 
 
+def nn_input_value(current_acc, new_info):
+    max_value = 3.0
+    decrease_coeff = current_acc / (max_value + 1.0)
+    new_acc = current_acc * decrease_coeff + new_info
+    if new_acc > max_value:
+        new_acc = max_value
+
+    return new_acc
+
+
 def read_matches(file_name):
     file = open(file_name, 'r', encoding='ISO-8859-1')
     first_line = True
@@ -254,16 +263,18 @@ def build_line(player, year, curr_round):
 
     for i in range(ATTRIBUTES):
         if log[player][year].get(curr_round) is not None and len(log[player][year][curr_round]) > 0:
-            scores[player][year][curr_round][i] = scores[player][year][curr_round - 1][i] * DECAY + \
-                                                  log[player][year][curr_round][i]
+            scores[player][year][curr_round][i] = nn_input_value(
+                scores[player][year][curr_round - 1][i], log[player][year][curr_round][i]
+            )
         else:
-            scores[player][year][curr_round][i] = scores[player][year][curr_round - 1][i] * DECAY
+            scores[player][year][curr_round][i] = nn_input_value(scores[player][year][curr_round - 1][i], 0.0)
 
     if log[player][year].get(curr_round) is not None and len(log[player][year][curr_round]) > 0:
-        scores[player][year][curr_round][-1] = scores[player][year][curr_round - 1][-1] * DECAY + \
-                                               log[player][year][curr_round][-1]
+        scores[player][year][curr_round][-1] = nn_input_value(
+            scores[player][year][curr_round - 1][-1], log[player][year][curr_round][-1]
+        )
     else:
-        scores[player][year][curr_round][-1] = scores[player][year][curr_round - 1][-1] * DECAY
+        scores[player][year][curr_round][-1] = nn_input_value(scores[player][year][curr_round - 1][-1], 0.0)
 
 
 def process_team_logs():
@@ -278,12 +289,14 @@ def process_team_logs():
                 if teams[team][year].get(round_num) is None:
                     teams[team][year][round_num] = {}
                 if round_num > 1:
-                    teams[team][year][round_num]['goals_taken'] = \
-                        DECAY * teams[team][year][prev_round[team]]['goals_taken'] + \
+                    teams[team][year][round_num]['goals_taken'] = nn_input_value(
+                        teams[team][year][prev_round[team]]['goals_taken'],
                         matches[year][round_num][team]['goals_taken']
-                    teams[team][year][round_num]['goals_scored'] = \
-                        DECAY * teams[team][year][prev_round[team]]['goals_scored'] + \
+                    )
+                    teams[team][year][round_num]['goals_scored'] = nn_input_value(
+                        teams[team][year][prev_round[team]]['goals_scored'],
                         matches[year][round_num][team]['goals_scored']
+                    )
                 else:
                     teams[team][year][round_num]['goals_taken'] = matches[year][round_num][team]['goals_taken']
                     teams[team][year][round_num]['goals_scored'] = matches[year][round_num][team]['goals_scored']
