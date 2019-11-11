@@ -190,13 +190,8 @@ class DirReader:
 
 
 def nn_input_value(current_acc, new_info):
-    max_value = 3.0
-    decrease_coeff = current_acc / (max_value + 1.0)
-    new_acc = current_acc * decrease_coeff + new_info
-    if new_acc > max_value:
-        new_acc = max_value
-
-    return new_acc
+    decay = 0.3
+    return current_acc * decay + new_info
 
 
 def read_matches(file_name):
@@ -271,7 +266,7 @@ def build_line(player, year, curr_round):
 
     if log[player][year].get(curr_round) is not None and len(log[player][year][curr_round]) > 0:
         scores[player][year][curr_round][-1] = nn_input_value(
-            scores[player][year][curr_round - 1][-1], log[player][year][curr_round][-1]
+            scores[player][year][curr_round - 1][-1], log[player][year][curr_round][-3]
         )
     else:
         scores[player][year][curr_round][-1] = nn_input_value(scores[player][year][curr_round - 1][-1], 0.0)
