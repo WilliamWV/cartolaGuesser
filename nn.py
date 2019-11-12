@@ -47,7 +47,7 @@ class Model:
         self.tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     def train(self):
-        self.model.compile(optimizer='adam', loss='mse', metrics=['mse', 'mae'])
+        self.model.compile(optimizer='adam', loss='mae', metrics=['mae'])
         self.model.fit(
             self.train_dataset, self.train_target,
             epochs=EPOCHS, callbacks=[self.tensorboard_callback],
