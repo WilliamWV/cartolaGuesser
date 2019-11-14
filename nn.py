@@ -22,8 +22,8 @@ dataset_abbr = {
 }
 
 EPOCHS = 50
-LOG_DIR = "logs\\fit_saved_mae\\"
-MODELS_DIR = 'models\\mae\\'
+LOG_DIR = "logs\\fit_saved_03\\"
+MODELS_DIR = 'models\\03\\'
 INPUT_VALS = 24
 
 
@@ -47,7 +47,7 @@ class Model:
         self.tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     def train(self):
-        self.model.compile(optimizer='adam', loss='mae', metrics=['mae'])
+        self.model.compile(optimizer='adam', loss='mse', metrics=['mae'])
         self.model.fit(
             self.train_dataset, self.train_target,
             epochs=EPOCHS, callbacks=[self.tensorboard_callback],
