@@ -41,20 +41,30 @@ def read_previous_scout():
             player_id = int(items[0])
             previous_scout[player_id] = {}
             for i in range(len(scout_items)):
-                previous_scout[player_id][scout_items[i]] = items[i+1]
+                previous_scout[player_id][scout_items[i]] = int(items[i+1])
 
 
-def get_round_diff(player, new_scout):
+def get_round_diff(player):
+    round_scout = {}
+    new_scout = player.scout
+    for item in scout_items:
+        if new_scout.get(item) is not None and previous_scout[player.id].get(item) is not None:
+            round_scout[item] = new_scout[item] - previous_scout[player.id][item]
+        elif new_scout.get(item) is not None:
+            round_scout[item] = new_scout[item]
+        else:
+            round_scout[item] = 0
+
+    return player.id, round_scout
+
+
+def update_history_file(round_scouts):
     pass
 
 
-def update_data(player):
-    scouts = player.scout
-    get_round_diff(player.id, scouts)
-
-
 if __name__ == '__main__':
+    players = api.mercado_atletas()
+    mount_current_scout(players)
     read_previous_scout()
-    atletas = api.mercado_atletas()
-    mount_current_scout(atletas)
-
+    round_scouts = dict([get_round_diff(player) for player in players])
+    update_history_file(round_scouts)
