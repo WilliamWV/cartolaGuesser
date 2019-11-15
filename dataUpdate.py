@@ -6,10 +6,11 @@ mercado = api.mercado()
 current_round = mercado.rodada_atual
 current_year = mercado.fechamento.year
 
-# A list with previous round scouts for all players
+# A dictionary with previous round scouts for all players
 # a player scout is a dictionary associating all non-zero features with its value
 
-previous_scout = []
+previous_scout = {}
+scout_items = ['A', 'CA', 'CV', 'DD', 'DP', 'FC', 'FD', 'FF', 'FS', 'FT', 'G', 'GC', 'GS', 'I', 'PE', 'PP', 'RB', 'SG']
 
 
 def mount_current_scout(atletas):
@@ -32,6 +33,15 @@ def mount_current_scout(atletas):
 
 def read_previous_scout():
     previous_round = current_round - 1
+    if (str(previous_round) + '.txt') in os.listdir('scouts/' + str(current_year)):
+        file = open('scouts/' + str(current_year) + str(previous_round) + '.txt', 'r')
+        _ = file.readline()
+        for line in file.readlines():
+            items = line.split(',')
+            player_id = int(items[0])
+            previous_scout[player_id] = {}
+            for i in range(len(scout_items)):
+                previous_scout[player_id][scout_items[i]] = items[i+1]
 
 
 def get_round_diff(player, new_scout):
