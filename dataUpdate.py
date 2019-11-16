@@ -58,8 +58,33 @@ def get_round_diff(player):
     return player.id, round_scout
 
 
-def update_history_file(round_scouts):
+def update_match_file():
     pass
+
+
+def update_history_files(round_scouts, players):
+    file_name = 'data/' + str(current_year) + '/rodada-' + str(current_round) + '.csv'
+    file = open(file_name, 'w')
+
+    file.write('atletas.atleta_id,atletas.clube.id.full.name,atletas.pontos_num,atletas.preco_num,atletas.posicao_id')
+    for item in scout_items:
+        file.write(','+item)
+    file.write('\n')
+
+    for player in players:
+        player_id = player.id
+        team = player.clube.nome
+        pos = player.posicao.abreviacao
+        preco = 0.0
+        points = 0.0
+        line = [player_id, team, points, preco, pos]
+        for item in scout_items:
+            line.append(round_scouts[player_id][item])
+        file.write(str(line[0]))
+        for item in line[1:]:
+            file.write(','+str(item))
+        file.write('\n')
+    
 
 
 if __name__ == '__main__':
@@ -67,4 +92,4 @@ if __name__ == '__main__':
     mount_current_scout(players)
     read_previous_scout()
     round_scouts = dict([get_round_diff(player) for player in players])
-    update_history_file(round_scouts)
+    update_history_file(round_scouts, players)
