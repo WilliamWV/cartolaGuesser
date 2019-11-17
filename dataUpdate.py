@@ -59,7 +59,15 @@ def get_round_diff(player):
 
 
 def update_match_file():
-    pass
+    matches = api.partidas(current_round - 1)
+    file = open('matches.csv', 'a')
+    for match in matches:
+        home_team = match.clube_casa.nome
+        away_team = match.clube_visitante.nome
+        home_goals = match.placar_casa
+        away_goals = match.placar_visitante
+        file.write(str(current_year) + ',' + str(current_round) + ',' + home_team + ',' + away_team +
+                   ',' + str(home_goals) + ',' + str(away_goals) + '\n')
 
 
 def update_history_files(round_scouts, players):
@@ -84,7 +92,7 @@ def update_history_files(round_scouts, players):
         for item in line[1:]:
             file.write(','+str(item))
         file.write('\n')
-    
+
 
 
 if __name__ == '__main__':
@@ -92,4 +100,5 @@ if __name__ == '__main__':
     mount_current_scout(players)
     read_previous_scout()
     round_scouts = dict([get_round_diff(player) for player in players])
-    update_history_file(round_scouts, players)
+    update_history_files(round_scouts, players)
+    update_match_file()
