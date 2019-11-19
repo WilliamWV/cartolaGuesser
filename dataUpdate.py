@@ -34,14 +34,14 @@ def mount_current_scout(atletas):
 def read_previous_scout():
     previous_round = current_round - 1
     if (str(previous_round) + '.txt') in os.listdir('scouts/' + str(current_year)):
-        file = open('scouts/' + str(current_year) + str(previous_round) + '.txt', 'r')
+        file = open('scouts/' + str(current_year) + '/' + str(previous_round) + '.txt', 'r')
         _ = file.readline()
         for line in file.readlines():
             items = line.split(',')
             player_id = int(items[0])
             previous_scout[player_id] = {}
             for i in range(len(scout_items)):
-                previous_scout[player_id][scout_items[i]] = int(items[i+1])
+                previous_scout[player_id][scout_items[i]] = float(items[i+1])
 
 
 def get_round_diff(player):
@@ -71,7 +71,7 @@ def update_match_file():
 
 
 def update_history_files(round_scouts, players):
-    file_name = 'data/' + str(current_year) + '/rodada-' + str(current_round) + '.csv'
+    file_name = 'data/' + str(current_year) + '/rodada-' + str(current_round-1) + '.csv'
     file = open(file_name, 'w')
 
     file.write('atletas.atleta_id,atletas.clube.id.full.name,atletas.pontos_num,atletas.preco_num,atletas.posicao_id')
@@ -94,11 +94,17 @@ def update_history_files(round_scouts, players):
         file.write('\n')
 
 
-
 if __name__ == '__main__':
+    print("Reading available players")
     players = api.mercado_atletas()
+    print("Mounting players scout")
     mount_current_scout(players)
+    print("Reading previous scout")
     read_previous_scout()
+    print("Mounting round scouts")
     round_scouts = dict([get_round_diff(player) for player in players])
+    print("Updating history file")
     update_history_files(round_scouts, players)
-    update_match_file()
+    print ("Updating match file")
+    # update_match_file()
+
