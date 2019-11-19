@@ -64,15 +64,20 @@ def update_match_file():
     for match in matches:
         home_team = match.clube_casa.nome
         away_team = match.clube_visitante.nome
-        home_goals = match.placar_casa
-        away_goals = match.placar_visitante
-        file.write(str(current_year) + ',' + str(current_round) + ',' + home_team + ',' + away_team +
+        if home_team == 'Athlético-PR':
+            home_team = 'Atlético-PR'
+        if away_team == 'Athlético-PR':
+            away_team = 'Atlético-PR'
+
+        home_goals = float(match.placar_casa)
+        away_goals = float(match.placar_visitante)
+        file.write(str(current_year) + ',' + str(current_round-1) + ',' + home_team + ',' + away_team +
                    ',' + str(home_goals) + ',' + str(away_goals) + '\n')
 
 
 def update_history_files(round_scouts, players):
     file_name = 'data/' + str(current_year) + '/rodada-' + str(current_round-1) + '.csv'
-    file = open(file_name, 'w')
+    file = open(file_name, 'w', encoding='utf-8')
 
     file.write('atletas.atleta_id,atletas.clube.id.full.name,atletas.pontos_num,atletas.preco_num,atletas.posicao_id')
     for item in scout_items:
@@ -82,6 +87,8 @@ def update_history_files(round_scouts, players):
     for player in players:
         player_id = player.id
         team = player.clube.nome
+        if team == 'Athlético-PR':
+            team = 'Atlético-PR'
         pos = player.posicao.abreviacao
         preco = 0.0
         points = 0.0
@@ -105,6 +112,6 @@ if __name__ == '__main__':
     round_scouts = dict([get_round_diff(player) for player in players])
     print("Updating history file")
     update_history_files(round_scouts, players)
-    print ("Updating match file")
-    # update_match_file()
+    print("Updating match file")
+    update_match_file()
 

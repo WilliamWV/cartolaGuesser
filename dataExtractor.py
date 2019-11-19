@@ -274,6 +274,7 @@ def build_line(player, year, curr_round):
 
 def process_team_logs():
     prev_round = {}
+    prev_year = {}
     for year in matches:
         for round_num in range(1, max(matches[year]) + 1):
             for team in matches[year][round_num]:
@@ -285,11 +286,11 @@ def process_team_logs():
                     teams[team][year][round_num] = {}
                 if round_num > 1:
                     teams[team][year][round_num]['goals_taken'] = nn_input_value(
-                        teams[team][year][prev_round[team]]['goals_taken'],
+                        teams[team][prev_year[team]][prev_round[team]]['goals_taken'],
                         matches[year][round_num][team]['goals_taken']
                     )
                     teams[team][year][round_num]['goals_scored'] = nn_input_value(
-                        teams[team][year][prev_round[team]]['goals_scored'],
+                        teams[team][prev_year[team]][prev_round[team]]['goals_scored'],
                         matches[year][round_num][team]['goals_scored']
                     )
                 else:
@@ -297,7 +298,7 @@ def process_team_logs():
                     teams[team][year][round_num]['goals_scored'] = matches[year][round_num][team]['goals_scored']
 
                 prev_round[team] = round_num
-
+                prev_year[team] = year
 
 def process_player_logs():
     for player in log:
@@ -332,7 +333,7 @@ def get_player_team(player, year_target, roundNum_target):
 
 
 def write_data_to_file():
-    out_file = open('scoresExtractedData.csv', 'w')
+    out_file = open('scoresExtractedData.csv', 'w', encoding='ISO-8859-1')
 
     out_file.write(
         'PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
