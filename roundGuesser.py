@@ -67,6 +67,7 @@ def parse_models():
 
     elif args.model_dir is not None:
         for item in os.listdir(args.model_dir):
+            print('Reading ' + str(item))
             inp_model = read_model(args.model_dir + '/' + item)
             model_names[inp_model] = item.replace('.h5', '')
             mod.append(inp_model)
@@ -102,8 +103,10 @@ def build_player_line(player_id, round_num, api):
         print("ERROR: Multiple lines of the same player")
         return None
     elif len(player_row) == 0:
+        print("No line found")
         return None
     else:
+        print("Found player row")
         player_team = player_row.values[0][3]
         player_vals = player_row.values[0][4:-1]
         player_line = np.concatenate([player_vals[:-6], player_vals[-5:]])
@@ -116,11 +119,14 @@ def build_player_line(player_id, round_num, api):
             print("ERROR: could not get the price of player " + str(player_id))
             return None
         else:
+            print("Single price")
             player_line[-3] = price[0]
             return player_line, player_id, player_team
 
 
 def predict_players_score(player_lines, trained_model):
+    print("Predict players score")
+    print("Player lines: " + str(player_lines))
     players_scores = {}
     for player_line in player_lines:
         line = player_line[0]
@@ -133,11 +139,14 @@ def predict_players_score(player_lines, trained_model):
             teams_score[player_team] = 0.0
 
         teams_score[player_team] += score
+        print("Changed score of " + str(player_team) + ' to ' + str(teams_score[player_team]))
     return players_scores
 
 
 def suggest_coach():
+    print("Team scores: " + str(teams_score))
     suggested_teams = [c for c in teams_score if teams_score[c] == max(teams_score.values())]
+    print("Suggested teams = " + str(suggested_teams))
     score = teams_score[suggested_teams[0]] / (11.0 * (len(model_names) / 5))
     all_players = cartolafc.Api().mercado_atletas()
     coachs = [c for c in all_players if c.posicao[2] == 'tec']
@@ -349,6 +358,7 @@ if __name__ == '__main__':
 
     print("Parsing models")
     models = parse_models()
+    print("Setting credentials")
     api.set_credentials(email, password)
 
     print("Running suggestions for year " + str(current_year) + " and round " + str(current_round))
@@ -359,7 +369,6 @@ if __name__ == '__main__':
 
     lines = {}
     print("Building player information for this round")
-
     lines['ata'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'ata'] if line is not None]
     lines['mei'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'mei'] if line is not None]
     lines['zag'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'zag'] if line is not None]
@@ -368,8 +377,8 @@ if __name__ == '__main__':
 
     print("Predicting players score")
     suggestions = {}
-
     for model in models:
+        print("Predicting for model " + str(model_names[model]))
         position = get_model_position(model)
         scores = predict_players_score(lines[position], model)
         suggestions[model] = get_suggestions(scores, position)

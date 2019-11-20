@@ -305,7 +305,7 @@ def process_player_logs():
         years_played = list(log[player].keys())
         years_played.sort()
         for year in years_played:
-            for roundNum in range(1, ROUNDS):
+            for roundNum in range(1, ROUNDS + 1):
                 build_line(player, year, roundNum)
 
 
@@ -342,7 +342,7 @@ def write_data_to_file():
 
     for player in scores:
         for year in log[player]:
-            for roundNum in range(max(log[player][year])):
+            for roundNum in range(max(log[player][year]) + 1):
                 out_file.write(str(player) + ',' + str(year) + ',' + str(roundNum))
                 if log[player][year].get(roundNum + 1) is not None and len(log[player][year][roundNum + 1]) > 0:
                     team = log[player][year][roundNum + 1][-4]
