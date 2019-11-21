@@ -342,17 +342,14 @@ def write_data_to_file():
 
     for player in scores:
         for year in log[player]:
-            for roundNum in range(max(log[player][year]) + 1):
+            for roundNum in range(1, max(log[player][year]) + 1):
                 out_file.write(str(player) + ',' + str(year) + ',' + str(roundNum))
-                if log[player][year].get(roundNum + 1) is not None and len(log[player][year][roundNum + 1]) > 0:
-                    team = log[player][year][roundNum + 1][-4]
+                if log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0:
+                    team = log[player][year][roundNum][-4]
                     try:
-                        adv = matches[year][roundNum + 2][team]['adv']
+                        adv = matches[year][roundNum][team]['adv']
                     except KeyError:
                         adv = None
-                elif log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0:
-                    team = log[player][year][roundNum][-4]
-                    adv = None
                 else:
                     team, adv = get_player_team(player, year, roundNum)
 
@@ -362,30 +359,25 @@ def write_data_to_file():
                 out_file.write(','+str(team))
                 for item in scores[player][year][roundNum]:
                     out_file.write(',' + '{:.2f}'.format(item))
-                if log[player][year].get(roundNum + 1) is not None and len(log[player][year][roundNum + 1]) > 0 and adv is not None:
-                    out_file.write(',' + str(log[player][year][roundNum + 1][-2]) + ',' + str(
-                        log[player][year][roundNum + 1][-1]) +
-                                   ',' + '{:.2f}'.format(teams[team][year][roundNum + 2]['goals_scored']) + ',' +
-                                   '{:.2f}'.format(teams[team][year][roundNum + 2]['goals_taken']) + ',' +
-                                   '{:.2f}'.format(teams[adv][year][roundNum + 2]['goals_scored']) + ',' +
-                                   '{:.2f}'.format(teams[adv][year][roundNum + 2]['goals_taken']) + ',' +
-                                   str(log[player][year][roundNum + 1][-3]))
-                elif log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0 and adv is not None:
-                    out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum + 1]['goals_scored']) + ',' +
-                                   '{:.2f}'.format(teams[team][year][roundNum + 1]['goals_taken']) +
-                                   '{:.2f}'.format(teams[adv][year][roundNum + 1]['goals_scored']) + ',' +
-                                   '{:.2f}'.format(teams[adv][year][roundNum + 1]['goals_taken']) + ',NA')
+                if log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0 and adv is not None:
+                    out_file.write(',' + str(log[player][year][roundNum][-2]) + ',' + str(
+                        log[player][year][roundNum][-1]) +
+                                   ',' + '{:.2f}'.format(teams[team][year][roundNum]['goals_scored']) + ',' +
+                                   '{:.2f}'.format(teams[team][year][roundNum]['goals_taken']) + ',' +
+                                   '{:.2f}'.format(teams[adv][year][roundNum]['goals_scored']) + ',' +
+                                   '{:.2f}'.format(teams[adv][year][roundNum]['goals_taken']) + ',' +
+                                   str(log[player][year][roundNum][-3]))
                 else:
-                    if team is None or teams[team].get(year) is None or teams[team][year].get(roundNum + 1) is None:
+                    if team is None or teams[team].get(year) is None or teams[team][year].get(roundNum) is None:
                         out_file.write(',NA,NA,0.0,0.0,0.0,0.0,NA')
-                    elif adv is not None and teams[adv].get(year) is not None and teams[adv][year].get(roundNum+1) is not None:
-                        out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum + 1]['goals_scored']) + ',' +
-                                       '{:.2f}'.format(teams[team][year][roundNum + 1]['goals_taken']) +
-                                       '{:.2f}'.format(teams[adv][year][roundNum + 1]['goals_scored']) + ',' +
-                                       '{:.2f}'.format(teams[adv][year][roundNum + 1]['goals_taken']) + ',NA')
+                    elif adv is not None and teams[adv].get(year) is not None and teams[adv][year].get(roundNum) is not None:
+                        out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum]['goals_scored']) + ',' +
+                                       '{:.2f}'.format(teams[team][year][roundNum]['goals_taken']) +
+                                       '{:.2f}'.format(teams[adv][year][roundNum]['goals_scored']) + ',' +
+                                       '{:.2f}'.format(teams[adv][year][roundNum]['goals_taken']) + ',NA')
                     elif team is not None and adv is None:
-                        out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum + 1]['goals_scored']) + ',' +
-                                       '{:.2f}'.format(teams[team][year][roundNum + 1]['goals_taken']) + '0.0,0.0,NA')
+                        out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum]['goals_scored']) + ',' +
+                                       '{:.2f}'.format(teams[team][year][roundNum]['goals_taken']) + '0.0,0.0,NA')
                 out_file.write('\n')
     out_file.close()
 
