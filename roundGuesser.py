@@ -96,8 +96,7 @@ def read_history(year, round_num):
 
 def build_player_line(player_id, round_num, api):
     global history
-
-    print("Building input for player: " + [player.apelido for player in api.mercado_atletas() if player.id == player_id][0])
+    
     player_row = history.loc[history['PlayerID'] == player_id]
     if len(player_row) > 1:
         print("ERROR: Multiple lines of the same player")
@@ -117,20 +116,16 @@ def build_player_line(player_id, round_num, api):
             print("ERROR: could not get the price of player " + str(player_id))
             return None
         else:
-            print(player_id, "Player_line_0: "+ str(player_line))
-            player_line[-3] = price[0]
-            print(player_id, "Player_line_1: " + str(player_line))
+            player_line[-6] = price[0]
             return player_line, player_id, player_team
 
 
 def predict_players_score(player_lines, trained_model):
-    print("Predict players score")
     players_scores = {}
     for player_line in player_lines:
         line = player_line[0]
         player_id = player_line[1]
         player_team = player_line[2]
-        print(player_line)
         tensor = tf.convert_to_tensor(line.reshape((1, 24)), np.float32)
         score = trained_model.predict(tensor).tolist()[0][0]
         players_scores[player_id] = score
@@ -375,7 +370,7 @@ if __name__ == '__main__':
     lines['lat'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'lat'] if line is not None]
     lines['gol'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'gol'] if line is not None]
 
-    '''
+
     print("Predicting players score")
     suggestions = {}
     for model in models:
@@ -396,4 +391,3 @@ if __name__ == '__main__':
     print('Coach suggestion: ', end='')
     print([player.apelido for player in api.mercado_atletas() if player.id == coach_suggestion[0]][0] + ':{:.2f}'.format(coach_suggestion[1]))
     print("Expected score: {:.2f}".format(team[1] + cap[1] + coach_suggestion[1]))
-    '''
