@@ -103,10 +103,8 @@ def build_player_line(player_id, round_num, api):
         print("ERROR: Multiple lines of the same player")
         return None
     elif len(player_row) == 0:
-        print("No line found")
         return None
     else:
-        print("Found player row")
         player_team = player_row.values[0][3]
         player_vals = player_row.values[0][4:-1]
         player_line = np.concatenate([player_vals[:-6], player_vals[-5:]])
@@ -119,19 +117,20 @@ def build_player_line(player_id, round_num, api):
             print("ERROR: could not get the price of player " + str(player_id))
             return None
         else:
-            print("Single price")
+            print(player_id, "Player_line_0: "+ str(player_line))
             player_line[-3] = price[0]
+            print(player_id, "Player_line_1: " + str(player_line))
             return player_line, player_id, player_team
 
 
 def predict_players_score(player_lines, trained_model):
     print("Predict players score")
-    print("Player lines: " + str(player_lines))
     players_scores = {}
     for player_line in player_lines:
         line = player_line[0]
         player_id = player_line[1]
         player_team = player_line[2]
+        print(player_line)
         tensor = tf.convert_to_tensor(line.reshape((1, 24)), np.float32)
         score = trained_model.predict(tensor).tolist()[0][0]
         players_scores[player_id] = score
@@ -139,7 +138,7 @@ def predict_players_score(player_lines, trained_model):
             teams_score[player_team] = 0.0
 
         teams_score[player_team] += score
-        print("Changed score of " + str(player_team) + ' to ' + str(teams_score[player_team]))
+        print(score, "Changed score of " + str(player_team) + ' to ' + str(teams_score[player_team]))
     return players_scores
 
 
@@ -288,6 +287,7 @@ def suggest_team(models_suggestions):
             vote_team(models_suggestions, formation, ata_models, mei_models, zag_models, lat_models, gol_models) for
             formation in team_formations]
         max_score = max([team[1] for team in possible_teams])
+
         optimal_team = [team for team in possible_teams if team[1] == max_score][0]
         return optimal_team
 
@@ -375,6 +375,7 @@ if __name__ == '__main__':
     lines['lat'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'lat'] if line is not None]
     lines['gol'] = [line for line in [build_player_line(player[0], current_round, api) for player in players if player[1] == 'gol'] if line is not None]
 
+    '''
     print("Predicting players score")
     suggestions = {}
     for model in models:
@@ -395,3 +396,4 @@ if __name__ == '__main__':
     print('Coach suggestion: ', end='')
     print([player.apelido for player in api.mercado_atletas() if player.id == coach_suggestion[0]][0] + ':{:.2f}'.format(coach_suggestion[1]))
     print("Expected score: {:.2f}".format(team[1] + cap[1] + coach_suggestion[1]))
+    '''
