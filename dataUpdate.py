@@ -93,6 +93,6 @@ if __name__ == '__main__':
     round_scouts = dict([fill_gaps(player) for player in players])
     print("Updating history file")
     update_history_files(round_scouts, players)
-    #print("Updating match file")
-    #update_match_file()
+    print("Updating match file")
+    update_match_file()
 
