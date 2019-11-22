@@ -133,14 +133,11 @@ def predict_players_score(player_lines, trained_model):
             teams_score[player_team] = 0.0
 
         teams_score[player_team] += score
-        print(score, "Changed score of " + str(player_team) + ' to ' + str(teams_score[player_team]))
     return players_scores
 
 
 def suggest_coach():
-    print("Team scores: " + str(teams_score))
     suggested_teams = [c for c in teams_score if teams_score[c] == max(teams_score.values())]
-    print("Suggested teams = " + str(suggested_teams))
     score = teams_score[suggested_teams[0]] / (11.0 * (len(model_names) / 5))
     all_players = cartolafc.Api().mercado_atletas()
     coachs = [c for c in all_players if c.posicao[2] == 'tec']
