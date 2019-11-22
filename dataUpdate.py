@@ -9,7 +9,6 @@ current_year = mercado.fechamento.year
 # A dictionary with previous round scouts for all players
 # a player scout is a dictionary associating all non-zero features with its value
 
-previous_scout = {}
 scout_items = ['A', 'CA', 'CV', 'DD', 'DP', 'FC', 'FD', 'FF', 'FS', 'FT', 'G', 'GC', 'GS', 'I', 'PE', 'PP', 'RB', 'SG']
 
 
@@ -31,30 +30,14 @@ def mount_current_scout(atletas):
         file.write('\n')
 
 
-def read_previous_scout():
-    previous_round = current_round - 1
-    if (str(previous_round) + '.txt') in os.listdir('scouts/' + str(current_year)):
-        file = open('scouts/' + str(current_year) + '/' + str(previous_round) + '.txt', 'r')
-        _ = file.readline()
-        for line in file.readlines():
-            items = line.split(',')
-            player_id = int(items[0])
-            previous_scout[player_id] = {}
-            for i in range(len(scout_items)):
-                previous_scout[player_id][scout_items[i]] = float(items[i+1])
-
-
-def get_round_diff(player):
+def fill_gaps(player):
     round_scout = {}
     new_scout = player.scout
     for item in scout_items:
-        if new_scout.get(item) is not None and previous_scout[player.id].get(item) is not None:
-            round_scout[item] = new_scout[item] - previous_scout[player.id][item]
-        elif new_scout.get(item) is not None:
+        if new_scout.get(item) is not None:
             round_scout[item] = new_scout[item]
         else:
-            round_scout[item] = 0
-
+            round_scout[item] = 0.0
     return player.id, round_scout
 
 
@@ -106,12 +89,10 @@ if __name__ == '__main__':
     players = api.mercado_atletas()
     print("Mounting players scout")
     mount_current_scout(players)
-    print("Reading previous scout")
-    read_previous_scout()
     print("Mounting round scouts")
-    round_scouts = dict([get_round_diff(player) for player in players])
+    round_scouts = dict([fill_gaps(player) for player in players])
     print("Updating history file")
     update_history_files(round_scouts, players)
-    print("Updating match file")
-    update_match_file()
+    #print("Updating match file")
+    #update_match_file()
 

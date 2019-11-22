@@ -96,7 +96,7 @@ def read_history(year, round_num):
 
 def build_player_line(player_id, round_num, api):
     global history
-    
+
     player_row = history.loc[history['PlayerID'] == player_id]
     if len(player_row) > 1:
         print("ERROR: Multiple lines of the same player")
