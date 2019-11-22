@@ -90,7 +90,6 @@ def read_history(year, round_num):
     data = pd.read_csv(history_file, header=0, delimiter=',', encoding='ISO-8859-1')
     year_data = data[data["Year"] == year]
     round_data = year_data[year_data["Round"] == round_num - 1]
-    print("Found " + str(len(round_data)) + " possible players")
     return round_data
 
 
@@ -356,6 +355,7 @@ if __name__ == '__main__':
     print("Running suggestions for year " + str(current_year) + " and round " + str(current_round))
     print("Getting players of the round")
     players = get_players()
+    print("Found " + str(len(players)) + " possible players")
     print("Calculating history of this round's players")
     history = read_history(current_year, current_round)
 
