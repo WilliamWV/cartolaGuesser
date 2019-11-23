@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 
+from threading import Thread
 import pandas as pd
 import tensorflow as tf
 
@@ -178,14 +179,29 @@ def build_models(train_tuple, test_tuple, abbr):
     return models
 
 
+class ModelTrainer(Thread):
+
+    def __init__(self, model, dataset, id):
+        Thread.__init__(self)
+        self.model = model
+        self.dataset = dataset
+        self.id = id
+
+    def run(self):
+        print("Running thread " + str(self.id))
+        self.model.train()
+        self.model.evaluate()
+        self.model.save(dataset_abbr[self.dataset[0]])
+        print("Finished thread " + str(self.id))
+
+
 def main():
     for dataset in datasets:
         train_tuple, test_tuple = read_data(dataset[0], dataset[1])
         models = build_models(train_tuple, test_tuple, dataset_abbr[dataset[0]])
-        for model in models:
-            model.train()
-            model.evaluate()
-            model.save(dataset_abbr[dataset[0]])
+        for i in range(len(models)):
+            model = models[i]
+            ModelTrainer(model, dataset, i).start()
 
 
 if __name__ == '__main__':
