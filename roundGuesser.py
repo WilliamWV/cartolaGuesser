@@ -316,37 +316,28 @@ def print_team(team_to_print):
 
     print("\nGol: ")
     for suggested_player in team_to_print['gol']:
-        print(
-            [player.apelido for player in api.mercado_atletas() if player.id == suggested_player[0]][0]
-            + ':' + '{:.2f}'.format(suggested_player[1])
-        )
+        player = get_player(suggested_player[0])
+        print(player.apelido + ': {:.2f}'.format(suggested_player[1]))
 
     print("\nLat: ")
     for suggested_player in team_to_print['lat']:
-        print(
-            [player.apelido for player in api.mercado_atletas() if player.id == suggested_player[0]][0]
-            + ':' + '{:.2f}'.format(suggested_player[1])
-        )
+        player = get_player(suggested_player[0])
+        print(player.apelido + ': {:.2f}'.format(suggested_player[1]))
 
     print("\nZag: ")
     for suggested_player in team_to_print['zag']:
-        print(
-            [player.apelido for player in api.mercado_atletas() if player.id == suggested_player[0]][0]
-            + ':' + '{:.2f}'.format(suggested_player[1])
-        )
+        player = get_player(suggested_player[0])
+        print(player.apelido + ': {:.2f}'.format(suggested_player[1]))
 
     print("\nMei: ")
     for suggested_player in team_to_print['mei']:
-        print(
-            [player.apelido for player in api.mercado_atletas() if player.id == suggested_player[0]][0]
-            + ':' + '{:.2f}'.format(suggested_player[1])
-        )
+        player = get_player(suggested_player[0])
+        print(player.apelido + ': {:.2f}'.format(suggested_player[1]))
+
     print("\nAta: ")
     for suggested_player in team_to_print['ata']:
-        print(
-            [player.apelido for player in api.mercado_atletas() if player.id == suggested_player[0]][0]
-            + ':' + '{:.2f}'.format(suggested_player[1])
-        )
+        player = get_player(suggested_player[0])
+        print(player.apelido + ': {:.2f}'.format(suggested_player[1]))
 
 
 def save_suggestion(team, year, roundNum):
