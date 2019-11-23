@@ -189,6 +189,64 @@ class DirReader:
                     last_round = round_num
 
 
+def round_forecast(player, year, round_num):
+    """
+        In an attempt to provide a better representation of what is expected from a player in each attribute, the
+        following formulation was developed:
+
+        The value won't consider only the previous value and decay it as done previously on nn_input_value function
+        the formulation proposed here consider this value to be a weighted sum of previous rounds attributes and the
+        weights are determined by the decreasing part of a parabola or by a decreasing line, so these distributions
+        are represented by the following constants
+
+            R = Number of previous rounds to consider
+            F = first derivative on the initial point of the distribution
+            S = second derivative of the distribution (zero if is a line)
+            W = initial weight
+
+        These constants may be subject to the following constraints in order to the weights be decreasing
+
+            F < 0                   } Once the weights shall be decreasing
+            F + (R-1) * S < 0       } so the newer results are more important
+            R >= 1                  Must consider at least one past round
+
+        Considering this, the following equations can be derived:
+
+            * W_i+1 = W_i + F_i                                                     (Eq. 1)
+                (where W_i is the weight of previous ith round and F_i is the first derivative associated with W_i)
+            * F_i+1 = F_i + S                                                       (Eq. 2)
+                (same idea of the above, but S is constant to all rounds)
+            * V = Sum(i = 1..R, W_i * x_i)                                          (Eq. 3)
+                (where V is the value returned by this function, and x_i is the log of the analised attribute on
+                the ith round)
+            * W_i+1 = W_i + i * S + F                                               (Eq. 4)
+                (from Eq. 1 and Eq. 2)
+            * W_i = W + (i-1) * (i-2) / 2 * S + (i - 1) * F                         (Eq. 5)
+                (from Eq. 4 recursively expanded)
+            * V = Sum(i = 1..R, (W + (i-1) * (i-2) / 2 * S + (i - 1) * F) * x_i)    (Eq. 6)
+                (from Eq. 5 and Eq. 3 - This equation is the calculated by this function)
+
+        Although there are 4 constants that determine the distribution, the W may be normalized and here it is proposed
+        to use a value to W such that the sum of all weights considered are equal to a constant C, this reduces the
+        number of tests once C may be the same for all tests. So W is defined as:
+
+            W = (C - R * (R-1) / 2 * F - combination(R, R-3) * S) / R               (Eq. 7)
+                (from Eq. 6)
+
+        This equation will guarantee that the following is valid:
+
+            Sum(i=1..R, W + (i-1)*(i-2)/2 * S + (i-1) * F) = C                      (Eq. 8)
+
+        And this allows an efficient normalization of the data with minimum memory and cpu time consumption considering
+        distribution patterns that can be either, linear, or with positive second derivative (like it was being done
+        with the nn_input_value function) and with negative second derivative, allowing more complex and possibly more
+        realistic ways to represent the data
+
+    """
+    pass
+
+
+
 def nn_input_value(current_acc, new_info):
     decay = 0.3
     return current_acc * decay + new_info
