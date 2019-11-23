@@ -19,6 +19,14 @@ password = None
 history = None
 
 
+def get_player(player_id):
+    player = [player for player in cartolafc.Api().mercado_atletas() if player.id == player_id]
+    if len(player) != 1:
+        print('ERROR: could not find player ' + str(player_id))
+    else:
+        return player[0]
+
+
 def read_model(model_path):
     return tf.keras.models.load_model(model_path)
 
@@ -341,6 +349,43 @@ def print_team(team_to_print):
         )
 
 
+def save_suggestion(team, year, roundNum):
+    file_name = 'suggestion/' + str(year) + '/' + str(roundNum) + '.txt'
+    file = open(file_name, 'w')
+    gols = [get_player(player[0]) for player in team[0]['gol']]
+    lats = [get_player(player[0]) for player in team[0]['lat']]
+    zags = [get_player(player[0]) for player in team[0]['zag']]
+    meis = [get_player(player[0]) for player in team[0]['mei']]
+    atas = [get_player(player[0]) for player in team[0]['ata']]
+    file.write('Suggestion to round ' + str(roundNum) + ' of ' + str(year) + '\n\n')
+    file.write('Foramation: ' + str(team[2][0] + team[2][1]) + '-' + str(team[2][2]) + '-' + str(team[2][3]) + '\n')
+
+    file.write('\nGol: \n')
+    for player in gols:
+        file.write(
+            "\tId = " + str(player.id) + "\tNickname = " + str(player.apelido) + "\tTeam = " + str(player.clube.nome) + '\n')
+
+    file.write('\nLat: \n')
+    for player in lats:
+        file.write(
+            "\tId = " + str(player.id) + "\tNickname = " + str(player.apelido) + "\tTeam = " + str(player.clube.nome) + '\n')
+
+    file.write('\nZag: \n')
+    for player in zags:
+        file.write(
+            "\tId = " + str(player.id) + "\tNickname = " + str(player.apelido) + "\tTeam = " + str(player.clube.nome) + '\n')
+
+    file.write('\nMei: \n')
+    for player in meis:
+        file.write(
+            "\tId = " + str(player.id) + "\tNickname = " + str(player.apelido) + "\tTeam = " + str(player.clube.nome) + '\n')
+
+    file.write('\nAta: \n')
+    for player in atas:
+        file.write(
+            "\tId = " + str(player.id) + "\tNickname = " + str(player.apelido) + "\tTeam = " + str(player.clube.nome) + '\n')
+
+
 if __name__ == '__main__':
     api = cartolafc.Api()
     mercado = api.mercado()
@@ -388,3 +433,5 @@ if __name__ == '__main__':
     print('Coach suggestion: ', end='')
     print([player.apelido for player in api.mercado_atletas() if player.id == coach_suggestion[0]][0] + ':{:.2f}'.format(coach_suggestion[1]))
     print("Expected score: {:.2f}".format(team[1] + cap[1] + coach_suggestion[1]))
+    print("Saving suggestion to file")
+    save_suggestion(team, current_year, current_round)

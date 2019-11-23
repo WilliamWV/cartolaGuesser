@@ -1,0 +1,24 @@
+Suggestion to round 34 of 2019
+
+Foramation: 4-3-3
+
+Gol: 
+	Id = 82453	Nickname = Tadeu	Team = Goiás
+
+Lat: 
+	Id = 38939	Nickname = Daniel Alves	Team = São Paulo
+	Id = 63013	Nickname = Marcos Rocha	Team = Palmeiras
+
+Zag: 
+	Id = 73421	Nickname = Rafael Vaz	Team = Goiás
+	Id = 79113	Nickname = Víctor Cuesta	Team = Internacional
+
+Mei: 
+	Id = 83433	Nickname = Patrick	Team = Internacional
+	Id = 98352	Nickname = Bruno Guimarães	Team = Athlético-PR
+	Id = 71844	Nickname = Thiago Galhardo	Team = Ceará
+
+Ata: 
+	Id = 69141	Nickname = Ricardo Bueno	Team = CSA
+	Id = 68920	Nickname = Dudu	Team = Palmeiras
+	Id = 86757	Nickname = Everton	Team = Grêmio
