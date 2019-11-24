@@ -203,7 +203,7 @@ def combinations(n, k):
     return factorial(n) / (factorial(k) * factorial(n-k))
 
 
-def round_forecast(player, year, round_num, attribute):
+def round_forecast(attribute_type, team, player, year, round_num, attribute):
     """
         In an attempt to provide a better representation of what is expected from a player in each attribute, the
         following formulation was developed:
@@ -274,8 +274,24 @@ def round_forecast(player, year, round_num, attribute):
     S = 0.04
     C = 5
     W = (C - R * (R - 1) / 2 * F - combinations(R, R-3) * S) / R
-    X = [log[player][year][round_num - r_i][attribute] for r_i in range(R)]
-
+    X = []
+    if attribute_type == 'player':
+        for r_i in range(R):
+            try:
+                x_i = log[player][year][round_num - r_i][attribute]
+            except KeyError:
+                x_i = 0.0
+            X.append(x_i)
+    elif attribute_type == 'team':
+        for r_i in range(R):
+            try:
+                x_i = matches[year][round_num][team][attribute]
+            except KeyError:
+                x_i = 0.0
+            X.append(x_i)
+    else:
+        print("ERROR: invalid attribute type to round forecast")
+        exit()
     V = 0
     for i in range(1, R + 1):
         V += ((W + (i-1) * (i-2) / 2 * S + (i-1)*F)*X[i-1])
