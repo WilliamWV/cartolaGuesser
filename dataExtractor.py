@@ -189,7 +189,21 @@ class DirReader:
                     last_round = round_num
 
 
-def round_forecast(player, year, round_num):
+def factorial(n):
+    if n < 0:
+        print('ERROR: attempt to get factorial of negative number')
+        exit()
+    if n == 1 or n == 0:
+        return 1
+    else:
+        return n * factorial(n-1)
+
+
+def combinations(n, k):
+    return factorial(n) / (factorial(k) * factorial(n-k))
+
+
+def round_forecast(player, year, round_num, attribute):
     """
         In an attempt to provide a better representation of what is expected from a player in each attribute, the
         following formulation was developed:
@@ -230,7 +244,7 @@ def round_forecast(player, year, round_num):
         to use a value to W such that the sum of all weights considered are equal to a constant C, this reduces the
         number of tests once C may be the same for all tests. So W is defined as:
 
-            W = (C - R * (R-1) / 2 * F - combination(R, R-3) * S) / R               (Eq. 7)
+            W = (C - R * (R-1) / 2 * F - combinations(R, R-3) * S) / R               (Eq. 7)
                 (from Eq. 6)
 
         This equation will guarantee that the following is valid:
@@ -243,8 +257,18 @@ def round_forecast(player, year, round_num):
         realistic ways to represent the data
 
     """
-    pass
+    R = 5
+    F = -0.25
+    S = 0.04
+    C = 5
+    W = (C - R * (R - 1) / 2 * F - combinations(R, R-3) * S) / R
+    X = [log[player][year][round_num - r_i][attribute] for r_i in range(R)]
 
+    V = 0
+    for i in range(1, R + 1):
+        V += ((W + (i-1) * (i-2) / 2 * S + (i-1)*F)*X[i-1])
+
+    return V
 
 
 def nn_input_value(current_acc, new_info):
