@@ -340,7 +340,7 @@ def print_team(team_to_print):
         print(player.apelido + ': {:.2f}'.format(suggested_player[1]))
 
 
-def save_suggestion(team, year, roundNum):
+def save_suggestion(team, coach, captain, year, roundNum):
     file_name = 'suggestion/' + str(year) + '/' + str(roundNum) + '.txt'
     file = open(file_name, 'w')
     gols = [get_player(player[0]) for player in team[0]['gol']]
@@ -375,6 +375,18 @@ def save_suggestion(team, year, roundNum):
     for player in atas:
         file.write(
             "\tId = " + str(player.id) + "\tNickname = " + str(player.apelido) + "\tTeam = " + str(player.clube.nome) + '\n')
+
+    file.write('\nCoach: \n')
+    player = get_player(coach)
+    file.write(
+        "\tId = " + str(player.id) + "\tNickname = " + str(player.apelido) + "\tTeam = " + str(
+            player.clube.nome) + '\n')
+
+    file.write('\nCaptain: \n')
+    player = get_player(captain)
+    file.write(
+        "\tId = " + str(player.id) + "\tNickname = " + str(player.apelido) + "\tTeam = " + str(
+            player.clube.nome) + '\n')
 
 
 if __name__ == '__main__':
@@ -425,4 +437,4 @@ if __name__ == '__main__':
     print([player.apelido for player in api.mercado_atletas() if player.id == coach_suggestion[0]][0] + ':{:.2f}'.format(coach_suggestion[1]))
     print("Expected score: {:.2f}".format(team[1] + cap[1] + coach_suggestion[1]))
     print("Saving suggestion to file")
-    save_suggestion(team, current_year, current_round)
+    save_suggestion(team, coach_suggestion[0], cap[0], current_year, current_round)
