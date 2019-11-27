@@ -1,0 +1,30 @@
+Suggestion to round 35 of 2019
+
+Foramation: 4-3-3
+
+Gol: 
+	Id = 71631	Nickname = Weverton	Team = Palmeiras
+
+Lat: 
+	Id = 90061	Nickname = Bruno Pacheco	Team = Chapecoense
+	Id = 38939	Nickname = Daniel Alves	Team = São Paulo
+
+Zag: 
+	Id = 79113	Nickname = Víctor Cuesta	Team = Internacional
+	Id = 52253	Nickname = Réver	Team = Atlético-MG
+
+Mei: 
+	Id = 95464	Nickname = Gregore	Team = Bahia
+	Id = 69705	Nickname = Nikão	Team = Athlético-PR
+	Id = 51772	Nickname = Everton Ribeiro	Team = Flamengo
+
+Ata: 
+	Id = 61188	Nickname = Gilberto	Team = Bahia
+	Id = 90285	Nickname = Bruno Henrique	Team = Flamengo
+	Id = 86757	Nickname = Everton	Team = Grêmio
+
+Coach: 
+	Id = 71224	Nickname = Jorge Jesus	Team = Flamengo
+
+Captain: 
+	Id = 90285	Nickname = Bruno Henrique	Team = Flamengo
