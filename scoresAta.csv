@@ -1,4 +1,4 @@
-PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,consGoals,advPG,advCG,pos,advPos,home,realScore
+PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,consGoals,advPG,advCG,teamPos,advPos,home,realScore
 37655,2018,1,América-MG,1.00,0.00,0.00,0.00,0.00,1.00,0.00,1.00,0.00,0.00,0.00,0.00,0.00,1.00,4.00,0.00,1.00,0.00,5.10,ata,10.4,3.00,0.00,0.00,3.00,2,19,1,5.1
 37655,2018,2,América-MG,0.30,0.00,0.00,0.00,0.00,1.30,1.00,1.30,1.00,0.00,0.00,0.00,0.00,0.30,2.20,0.00,0.30,0.00,3.23,ata,9.47,0.90,2.00,2.60,0.60,8,3,0,1.7
 37655,2018,3,América-MG,0.09,0.00,0.00,0.00,0.00,4.39,2.30,0.39,2.30,0.00,1.00,0.00,0.00,0.09,7.66,0.00,1.09,0.00,9.77,ata,11.21,2.27,1.60,1.48,2.78,3,17,1,8.8

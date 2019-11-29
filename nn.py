@@ -24,7 +24,7 @@ dataset_abbr = {
 EPOCHS = 50
 LOG_DIR = "logs\\fit_saved_03\\"
 MODELS_DIR = 'models\\03\\'
-INPUT_VALS = 24
+INPUT_VALS = 27
 
 
 class Model:

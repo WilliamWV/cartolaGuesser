@@ -456,7 +456,7 @@ def write_data_to_file():
 
     out_file.write(
         'PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
-        'consGoals,advPG,advCG,pos,advPos,home,realScore\n'
+        'consGoals,advPG,advCG,teamPos,advPos,home,realScore\n'
     )
 
     for player in scores:
@@ -519,7 +519,7 @@ def split_file():
     for out_file in [gol_file, zag_file, lat_file, mei_file, ata_file]:
         out_file.write(
             'PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
-            'consGoals,advPG,advCG,pos,advPos,home,realScore\n'
+            'consGoals,advPG,advCG,teamPos,advPos,home,realScore\n'
         )
 
     for line in in_file.readlines():
