@@ -33,15 +33,23 @@ class TeamClassification:
     def __lt__(self, other):
         if self.points < other.points:
             return True
+        elif self.points > other.points:
+            return False
         elif self.wins < other.wins:
             return True
+        elif self.wins > other.wins:
+            return False
         elif self.sg < other.sg:
             return True
+        elif self.sg > other.sg:
+            return False
         elif self.gp < other.gp:
             return True
+        elif self.gp > other.gp:
+            return False
         return False
 
-    def __le__(self, other):
+    '''def __le__(self, other):
         return self < other or self == other
 
     def __ge__(self, other):
@@ -52,7 +60,7 @@ class TeamClassification:
 
     def __ne__(self, other):
         return not (self == other)
-
+'''
     def __repr__(self):
         return "Pnt: %d\tW: %d\tD: %d\tL: %d\tGP: %d\tGC: %d\tSG:%d\t%s\n" % (self.points, self.wins, self.draws, self.loses, self.gp, self.gc, self.sg, self.name)
 
@@ -129,9 +137,6 @@ def read_data(file):
         if logs[year].get(round_num) is None:
             logs[year][round_num] = {}
 
-        if (items[2] == 'Chapecoense' or items[3] == 'Chapecoense') and year == 2019:
-            a = 1
-            print('Chamando chape')
         last_classification = get_last_class(year, round_num, items[2])
         logs[year][round_num][items[2]] = update_classification(last_classification, match)
         last_classification = get_last_class(year, round_num, items[3])
