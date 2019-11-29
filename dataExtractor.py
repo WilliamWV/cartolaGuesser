@@ -196,11 +196,11 @@ def factorial(n):
     if n == 1 or n == 0:
         return 1
     else:
-        return n * factorial(n-1)
+        return n * factorial(n - 1)
 
 
 def combinations(n, k):
-    return factorial(n) / (factorial(k) * factorial(n-k))
+    return factorial(n) / (factorial(k) * factorial(n - k))
 
 
 def round_forecast(attribute_type, team, player, year, round_num, attribute):
@@ -273,7 +273,7 @@ def round_forecast(attribute_type, team, player, year, round_num, attribute):
     F = -0.25
     S = 0.04
     C = 5
-    W = (C - R * (R - 1) / 2 * F - combinations(R, R-3) * S) / R
+    W = (C - R * (R - 1) / 2 * F - combinations(R, R - 3) * S) / R
     X = []
     if attribute_type == 'player':
         for r_i in range(R):
@@ -294,7 +294,7 @@ def round_forecast(attribute_type, team, player, year, round_num, attribute):
         exit()
     V = 0
     for i in range(1, R + 1):
-        V += ((W + (i-1) * (i-2) / 2 * S + (i-1)*F)*X[i-1])
+        V += ((W + (i - 1) * (i - 2) / 2 * S + (i - 1) * F) * X[i - 1])
 
     return V
 
@@ -318,15 +318,23 @@ def read_matches(file_name):
             away_team = args[3]
             home_goals = float(args[4])
             away_goals = float(args[5])
+            home_pos = int(args[6])
+            away_pos = int(args[7])
             if matches.get(year) is None:
                 matches[year] = {}
             if matches[year].get(round_num) is None:
                 matches[year][round_num] = {}
 
             matches[year][round_num][home_team] = \
-                {'goals_taken': away_goals, 'goals_scored': home_goals, 'adv': away_team}
+                {
+                    'goals_taken': away_goals, 'goals_scored': home_goals, 'adv': away_team,
+                    'pos': home_pos
+                }
             matches[year][round_num][away_team] = \
-                {'goals_taken': home_goals, 'goals_scored': away_goals, 'adv': home_team}
+                {
+                    'goals_taken': home_goals, 'goals_scored': away_goals, 'adv': home_team,
+                    'pos': away_pos
+                }
 
 
 def parse_input():
@@ -410,6 +418,7 @@ def process_team_logs():
                 prev_round[team] = round_num
                 prev_year[team] = year
 
+
 def process_player_logs():
     for player in log:
         years_played = list(log[player].keys())
@@ -447,7 +456,7 @@ def write_data_to_file():
 
     out_file.write(
         'PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
-        'consGoals,advPG,advCG,realScore\n'
+        'consGoals,advPG,advCG,pos,advPos,realScore\n'
     )
 
     for player in scores:
@@ -466,29 +475,25 @@ def write_data_to_file():
                 if team == 'Athlético-PR':
                     team = 'Atlético-PR'
 
-                out_file.write(','+str(team))
+                out_file.write(',' + str(team))
                 for item in scores[player][year][roundNum]:
                     out_file.write(',' + '{:.2f}'.format(item))
-                if log[player][year].get(roundNum) is not None and len(log[player][year][roundNum]) > 0 and adv is not None:
+                if log[player][year].get(roundNum) is not None and len(
+                        log[player][year][roundNum]) > 0 and adv is not None:
                     out_file.write(',' + str(log[player][year][roundNum][-2]) + ',' + str(
                         log[player][year][roundNum][-1]) +
                                    ',' + '{:.2f}'.format(teams[team][year][roundNum]['goals_scored']) + ',' +
                                    '{:.2f}'.format(teams[team][year][roundNum]['goals_taken']) + ',' +
                                    '{:.2f}'.format(teams[adv][year][roundNum]['goals_scored']) + ',' +
                                    '{:.2f}'.format(teams[adv][year][roundNum]['goals_taken']) + ',' +
+                                   str(matches[year][roundNum][team]['pos']) + ',' +
+                                   str(matches[year][roundNum][adv]['pos']) + ',' +
                                    str(log[player][year][roundNum][-3]))
                 else:
-                    if team is None or teams[team].get(year) is None or teams[team][year].get(roundNum) is None:
-                        out_file.write(',NA,NA,0.0,0.0,0.0,0.0,NA')
-                    elif adv is not None and teams[adv].get(year) is not None and teams[adv][year].get(roundNum) is not None:
-                        out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum]['goals_scored']) + ',' +
-                                       '{:.2f}'.format(teams[team][year][roundNum]['goals_taken']) +
-                                       '{:.2f}'.format(teams[adv][year][roundNum]['goals_scored']) + ',' +
-                                       '{:.2f}'.format(teams[adv][year][roundNum]['goals_taken']) + ',NA')
-                    elif team is not None and adv is None:
-                        out_file.write(',NA,NA,{:.2f}'.format(teams[team][year][roundNum]['goals_scored']) + ',' +
-                                       '{:.2f}'.format(teams[team][year][roundNum]['goals_taken']) + '0.0,0.0,NA')
+                    out_file.write(',NA,NA,0.0,0.0,0.0,0.0,NA,NA,NA')
+
                 out_file.write('\n')
+
     out_file.close()
 
 
