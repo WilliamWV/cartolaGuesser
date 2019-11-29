@@ -18,6 +18,7 @@ email = None
 password = None
 history = None
 
+ATTRS_NUM = 27
 
 def get_player(player_id):
     player = [player for player in cartolafc.Api().mercado_atletas() if player.id == player_id]
@@ -113,7 +114,7 @@ def build_player_line(player_id, round_num, api):
     else:
         player_team = player_row.values[0][3]
         player_vals = player_row.values[0][4:-1]
-        player_line = np.concatenate([player_vals[:-6], player_vals[-5:]])
+        player_line = np.concatenate([player_vals[:-9], player_vals[-8:]])
         price = [
             round_score.preco
             for round_score in api.pontuacao_atleta(player_id)
@@ -123,7 +124,7 @@ def build_player_line(player_id, round_num, api):
             print("ERROR: could not get the price of player " + str(player_id))
             return None
         else:
-            player_line[-6] = price[0]
+            player_line[-9] = price[0]
             return player_line, player_id, player_team
 
 
@@ -133,7 +134,7 @@ def predict_players_score(player_lines, trained_model):
         line = player_line[0]
         player_id = player_line[1]
         player_team = player_line[2]
-        tensor = tf.convert_to_tensor(line.reshape((1, 24)), np.float32)
+        tensor = tf.convert_to_tensor(line.reshape((1, ATTRS_NUM)), np.float32)
         score = trained_model.predict(tensor).tolist()[0][0]
         players_scores[player_id] = score
         if teams_score.get(player_team) is None:
