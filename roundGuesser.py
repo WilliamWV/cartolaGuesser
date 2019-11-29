@@ -201,17 +201,21 @@ def build_team(models_suggestions, formation, ata_model, mei_model, zag_model, l
 
 
 def get_most_voteds(vote_list, num_classified):
+    expected_scores = {}
+    for item in vote_list:
+        expected_scores[item[0]] = item
+
     vote_log = {}
     for item in vote_list:
-        if vote_log.get(item) is None:
-            vote_log[item] = 1
+        if vote_log.get(item[0]) is None:
+            vote_log[item[0]] = 1
         else:
-            vote_log[item] += 1
+            vote_log[item[0]] += 1
 
     votes_vals = list(vote_log.values())
     arr = np.array(votes_vals)
     highest_indexes = arr.argsort()[-num_classified:][::-1]
-    voted_items = list(vote_log.keys())
+    voted_items = [expected_scores[id] for id in vote_log.keys()]
     return [voted_items[ind] for ind in highest_indexes]
 
 

@@ -6,25 +6,25 @@ Gol:
 	Id = 82453	Nickname = Tadeu	Team = Goiás
 
 Lat: 
-	Id = 70916	Nickname = Diogo Barbosa	Team = Palmeiras
 	Id = 63013	Nickname = Marcos Rocha	Team = Palmeiras
+	Id = 38750	Nickname = Filipe Luís	Team = Flamengo
 
 Zag: 
 	Id = 79113	Nickname = Víctor Cuesta	Team = Internacional
-	Id = 68923	Nickname = Gil	Team = Corinthians
+	Id = 80853	Nickname = Pedro Geromel	Team = Grêmio
 
 Mei: 
 	Id = 78478	Nickname = Willian Arão	Team = Flamengo
-	Id = 81682	Nickname = Cazares	Team = Atlético-MG
 	Id = 87863	Nickname = Arrascaeta	Team = Flamengo
+	Id = 70944	Nickname = Bruno Henrique	Team = Palmeiras
 
 Ata: 
-	Id = 70360	Nickname = Eduardo Sasha	Team = Santos
 	Id = 83257	Nickname = Gabriel	Team = Flamengo
-	Id = 83257	Nickname = Gabriel	Team = Flamengo
+	Id = 90285	Nickname = Bruno Henrique	Team = Flamengo
+	Id = 68920	Nickname = Dudu	Team = Palmeiras
 
 Coach: 
 	Id = 71224	Nickname = Jorge Jesus	Team = Flamengo
 
 Captain: 
-	Id = 83257	Nickname = Gabriel	Team = Flamengo
+	Id = 90285	Nickname = Bruno Henrique	Team = Flamengo
