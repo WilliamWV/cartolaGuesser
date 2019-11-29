@@ -328,12 +328,12 @@ def read_matches(file_name):
             matches[year][round_num][home_team] = \
                 {
                     'goals_taken': away_goals, 'goals_scored': home_goals, 'adv': away_team,
-                    'pos': home_pos
+                    'pos': home_pos, 'home': True
                 }
             matches[year][round_num][away_team] = \
                 {
                     'goals_taken': home_goals, 'goals_scored': away_goals, 'adv': home_team,
-                    'pos': away_pos
+                    'pos': away_pos, 'home': False
                 }
 
 
@@ -456,7 +456,7 @@ def write_data_to_file():
 
     out_file.write(
         'PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
-        'consGoals,advPG,advCG,pos,advPos,realScore\n'
+        'consGoals,advPG,advCG,pos,advPos,home,realScore\n'
     )
 
     for player in scores:
@@ -488,9 +488,10 @@ def write_data_to_file():
                                    '{:.2f}'.format(teams[adv][year][roundNum]['goals_taken']) + ',' +
                                    str(matches[year][roundNum][team]['pos']) + ',' +
                                    str(matches[year][roundNum][adv]['pos']) + ',' +
+                                   str(int(matches[year][roundNum][team]['home'])) + ',' +
                                    str(log[player][year][roundNum][-3]))
                 else:
-                    out_file.write(',NA,NA,0.0,0.0,0.0,0.0,NA,NA,NA')
+                    out_file.write(',NA,NA,0.0,0.0,0.0,0.0,NA,NA,0,NA')
 
                 out_file.write('\n')
 
@@ -518,7 +519,7 @@ def split_file():
     for out_file in [gol_file, zag_file, lat_file, mei_file, ata_file]:
         out_file.write(
             'PlayerID,Year,Round,Team,A,CA,CV,DD,DP,FC,FD,FF,FS,FT,G,GC,GS,I,PE,PP,RB,SG,PNT,pos,price,proGoals,'
-            'consGoals,advPG,advCG,realScore\n'
+            'consGoals,advPG,advCG,pos,advPos,home,realScore\n'
         )
 
     for line in in_file.readlines():
