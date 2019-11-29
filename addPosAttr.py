@@ -110,7 +110,7 @@ def init_objs():
     file_name = 'matches.csv'
     out_file = 'matches_with_pos.csv'
     file = open(file_name, 'r')
-    out = out_file
+    out = open(out_file, 'w')
     return file, out
 
 
@@ -158,13 +158,33 @@ def mount_classifications():
         if current_year == year:
             max_range = current_round
         for round_num in range(1, max_range):
-            print(year, round_num)
             teams = list(logs[year][round_num].values())
             classifications[year][round_num] = classify_teams(teams)
+
+
+def get_pos(year, round_num, team):
+    current_pos = 1
+    teams = classifications[int(year)][int(round_num)]
+    while teams[current_pos-1].name != team:
+        current_pos += 1
+
+    return current_pos
+
+
+def write_new_file(file, out):
+    file.seek(0)
+    _ = file.readline()
+    out.write('Year,Round,Home,Away,HG,AG,Hpos,Apos\n')
+
+    for line in file.readlines():
+        items = line.replace('\n', '').split(',')
+        out.write(items[0] + ',' + items[1] + ',' + items[2] + ',' + items[3] + ',' + items[4] + ',' + items[5] + ',')
+        out.write(str(get_pos(items[0], items[1], items[2])) + ',' + str(get_pos(items[0], items[1], items[3])) + '\n')
 
 
 if __name__ == '__main__':
     file, out = init_objs()
     read_data(file)
     mount_classifications()
-    print(classifications)
+    write_new_file(file, out)
+
