@@ -74,7 +74,7 @@ def update_history_files(round_scouts, players):
             team = 'Atlético-PR'
         pos = player.posicao.abreviacao
         preco = 0.0
-        points = 0.0
+        points = player.pontos
         line = [player_id, team, points, preco, pos]
         for item in scout_items:
             line.append(round_scouts[player_id][item])
