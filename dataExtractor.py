@@ -300,7 +300,7 @@ def round_forecast(attribute_type, team, player, year, round_num, attribute):
 
 
 def nn_input_value(current_acc, new_info):
-    decay = 0.3
+    decay = 0.5
     return current_acc * decay + new_info
 
 
