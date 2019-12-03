@@ -1,0 +1,30 @@
+Suggestion to round 37 of 2019
+
+Foramation: 4-3-3
+
+Gol: 
+	Id = 82453	Nickname = Tadeu	Team = Goiás
+
+Lat: 
+	Id = 78850	Nickname = Reinaldo	Team = São Paulo
+	Id = 63013	Nickname = Marcos Rocha	Team = Palmeiras
+
+Zag: 
+	Id = 87342	Nickname = Kannemann	Team = Grêmio
+	Id = 79113	Nickname = Víctor Cuesta	Team = Internacional
+
+Mei: 
+	Id = 87863	Nickname = Arrascaeta	Team = Flamengo
+	Id = 70944	Nickname = Bruno Henrique	Team = Palmeiras
+	Id = 51772	Nickname = Everton Ribeiro	Team = Flamengo
+
+Ata: 
+	Id = 83257	Nickname = Gabriel	Team = Flamengo
+	Id = 68920	Nickname = Dudu	Team = Palmeiras
+	Id = 86757	Nickname = Everton	Team = Grêmio
+
+Coach: 
+	Id = 71224	Nickname = Jorge Jesus	Team = Flamengo
+
+Captain: 
+	Id = 83257	Nickname = Gabriel	Team = Flamengo
