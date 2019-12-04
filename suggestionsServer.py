@@ -6,22 +6,21 @@ IP = '127.0.0.1'
 BUFFER_SIZE = 16
 BACKLOG = 5
 
-'''
-OPERATIONS:
-    - 'S',  # Get suggestions to this round
-    - 'H',  # Help, should return all operations available and a small description
-    - 'P',  # Get suggestions to previous round -> needs an additional integer to indicate the round ex: P34
-    - Any other input should receive an error message and the help response
-RESPONSES:
-    Formed as:
-    - s,r: where s is the status and r the response
-    Status are:
-        0: OK
-        1: Failed to read data
-        2: Failed to obtain round number
-        3: Unknown operation
-    
-'''
+HELP_MESSAGE = " \
+    \nOPERATIONS: \
+        \n\t- 'S',  # Get suggestions to this round \
+        \n\t- 'H',  # Help, should return all operations available and a small description \
+        \n\t- 'P',  # Get suggestions to previous round -> needs an additional integer to indicate the round ex: P34 \
+        \n\t- Any other input should receive an error message and the help response \
+    \nRESPONSES: \
+        \n\tFormed as: \
+        \n\t- s,r: where s is the status and r the response message \
+        \n\tStatus are: \
+            \n\t\t0: OK \
+            \n\t\t1: Failed to read data \
+            \n\t\t2: Failed to obtain round number \
+            \n\t\t3: Unknown operation \
+"
 
 OK = 0
 FAILED_TO_READ_DATA = 1
@@ -58,18 +57,18 @@ def suggestion(conn, addr, round_num):
     pass
 
 
-def help(conn, addr):
-    pass
+def help(conn):
+    conn.send(str(OK) + "," + HELP_MESSAGE)
 
 
-def error(conn, addr, code, message):
-    conn.send(str(code) + ": " + message)
+def error(conn, code, message):
+    conn.send(str(code) + "," + message)
 
 
 def process(conn, addr):
     data = conn.recv(BUFFER_SIZE)
     if not data:
-        error(conn, addr, FAILED_TO_READ_DATA, "Failed to read request message")
+        error(conn, FAILED_TO_READ_DATA, "Failed to read request message")
     else:
         if data[0] == SUGGESTION_OP:
             current_round = cartolafc.Api().mercado().rodada_atual
@@ -79,12 +78,12 @@ def process(conn, addr):
                 round_num = int(data[1:])
                 suggestion(conn, addr, round_num)
             except ValueError:
-                error(conn, addr, FAILED_TO_OBTAIN_ROUND, "Failed to obtain a number to identify the previous round "
-                                                          "from: " + str(data))
+                error(conn, FAILED_TO_OBTAIN_ROUND, "Failed to obtain a number to identify the previous round "
+                                                    "from: " + str(data))
         elif data[0] == HELP_OP:
-            help(conn, addr)
+            help(conn)
         else:
-            error(conn, addr, UNKNOWN_OP, "Unknown operation: " + str(data))
+            error(conn, UNKNOWN_OP, "Unknown operation: " + str(data))
     conn.close()
 
 
