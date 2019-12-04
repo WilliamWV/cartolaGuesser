@@ -3,6 +3,7 @@ import socket
 import cartolafc
 import time
 import os
+import threading
 
 IP = '127.0.0.1'
 BUFFER_SIZE = 16
@@ -36,6 +37,50 @@ PREVIOUS_SUGG_OP = 'P'
 HELP_OP = 'H'
 
 
+class RequestHandler(threading.Thread):
+
+    def __init__(self, conn):
+        threading.Thread.__init__(self)
+        self.conn = conn
+
+    def suggestion(self, round_num):
+        current_year = time.localtime().tm_year
+        suggestion_dir = 'suggestion/' + str(current_year) + '/'
+        if round_num in [int(file.replace('.txt', '')) for file in os.listdir(suggestion_dir)]:
+            file = open(suggestion_dir + str(round_num) + '.txt')
+            message = file.read()
+            self.conn.send(str(OK) + ',' + str(message))
+        else:
+            self.error(SUGGESTION_NOT_FOUND, "Could not find suggestions to round " + str(round_num))
+
+    def help(self):
+        self.conn.send(str(OK) + "," + HELP_MESSAGE)
+
+    def error(self, code, message):
+        self.conn.send(str(code) + "," + message)
+
+    def run(self):
+        data = self.conn.recv(BUFFER_SIZE)
+        if not data:
+            self.error(FAILED_TO_READ_DATA, "Failed to read request message")
+        else:
+            if data[0] == SUGGESTION_OP:
+                current_round = cartolafc.Api().mercado().rodada_atual
+                self.suggestion(current_round)
+            elif data[0] == PREVIOUS_SUGG_OP:
+                try:
+                    round_num = int(data[1:])
+                    self.suggestion(round_num)
+                except ValueError:
+                    self.error(FAILED_TO_OBTAIN_ROUND, "Failed to obtain a number to identify the previous round "
+                                                       "from: " + str(data))
+            elif data[0] == HELP_OP:
+                self.help()
+            else:
+                self.error(UNKNOWN_OP, "Unknown operation: " + str(data))
+        self.conn.close()
+
+
 def parse_arguments():
     global IP
     parser = argparse.ArgumentParser(description='Server of suggestions, receives port to listen TCP connections')
@@ -48,54 +93,14 @@ def parse_arguments():
 
 
 def listen(port):
-    s_listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s_listener.bind((IP, port))
-    s_listener.listen(BACKLOG)
+    while True:
+        s_listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s_listener.bind((IP, port))
+        s_listener.listen(BACKLOG)
 
-    conn, addr = s_listener.accept()
-    print("Connected with " + str(addr))
-    process(conn)
-
-
-def suggestion(conn, round_num):
-    current_year = time.localtime().tm_year
-    suggestion_dir = 'suggestion/' + str(current_year) + '/'
-    if round_num in [int(file.replace('.txt', '')) for file in os.listdir(suggestion_dir)]:
-        file = open(suggestion_dir + str(round_num) + '.txt')
-        message = file.read()
-        conn.send(str(OK) + ',' + str(message))
-    else:
-        error(conn, SUGGESTION_NOT_FOUND, "Could not find suggestions to round " + str(round_num))
-
-
-def help(conn):
-    conn.send(str(OK) + "," + HELP_MESSAGE)
-
-
-def error(conn, code, message):
-    conn.send(str(code) + "," + message)
-
-
-def process(conn):
-    data = conn.recv(BUFFER_SIZE)
-    if not data:
-        error(conn, FAILED_TO_READ_DATA, "Failed to read request message")
-    else:
-        if data[0] == SUGGESTION_OP:
-            current_round = cartolafc.Api().mercado().rodada_atual
-            suggestion(conn, current_round)
-        elif data[0] == PREVIOUS_SUGG_OP:
-            try:
-                round_num = int(data[1:])
-                suggestion(conn, round_num)
-            except ValueError:
-                error(conn, FAILED_TO_OBTAIN_ROUND, "Failed to obtain a number to identify the previous round "
-                                                    "from: " + str(data))
-        elif data[0] == HELP_OP:
-            help(conn)
-        else:
-            error(conn, UNKNOWN_OP, "Unknown operation: " + str(data))
-    conn.close()
+        conn, addr = s_listener.accept()
+        print("Connected with " + str(addr))
+        RequestHandler(conn).start()
 
 
 if __name__ == '__main__':
