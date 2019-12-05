@@ -14,6 +14,7 @@ HELP_MESSAGE = " \
         \n\t- 'S',  # Get suggestions to this round \
         \n\t- 'H',  # Help, should return all operations available and a small description \
         \n\t- 'P',  # Get suggestions to previous round -> needs an additional integer to indicate the round ex: P34 \
+        \n\t- 'X',  # Close connection \
         \n\t- Any other input should receive an error message and the help response \
     \nRESPONSES: \
         \n\tFormed as: \
@@ -35,6 +36,8 @@ SUGGESTION_NOT_FOUND = 4
 SUGGESTION_OP = 'S'
 PREVIOUS_SUGG_OP = 'P'
 HELP_OP = 'H'
+CLOSE_CONNECTION = 'X'
+encoder = 'utf-8'
 
 
 class RequestHandler(threading.Thread):
@@ -49,36 +52,42 @@ class RequestHandler(threading.Thread):
         if round_num in [int(file.replace('.txt', '')) for file in os.listdir(suggestion_dir)]:
             file = open(suggestion_dir + str(round_num) + '.txt')
             message = file.read()
-            self.conn.send((str(OK) + ',' + str(message)).encode('ascii'))
+            self.conn.send((str(OK) + ',' + str(message)).encode(encoder))
         else:
             self.error(SUGGESTION_NOT_FOUND, "Could not find suggestions to round " + str(round_num))
 
     def help(self):
-        self.conn.send((str(OK) + "," + HELP_MESSAGE).encode('ascii'))
+        self.conn.send((str(OK) + "," + HELP_MESSAGE).encode(encoder))
 
     def error(self, code, message):
-        self.conn.send((str(code) + "," + message).encode('ascii'))
+        self.conn.send((str(code) + "," + message).encode(encoder))
 
     def run(self):
-        data = self.conn.recv(BUFFER_SIZE)
-        if not data:
-            self.error(FAILED_TO_READ_DATA, "Failed to read request message")
-        else:
-            if data[0] == SUGGESTION_OP:
-                current_round = cartolafc.Api().mercado().rodada_atual
-                self.suggestion(current_round)
-            elif data[0] == PREVIOUS_SUGG_OP:
-                try:
-                    round_num = int(data[1:])
-                    self.suggestion(round_num)
-                except ValueError:
-                    self.error(FAILED_TO_OBTAIN_ROUND, "Failed to obtain a number to identify the previous round "
-                                                       "from: " + str(data))
-            elif data[0] == HELP_OP:
-                self.help()
+        connected = True
+        while connected:
+            data = self.conn.recv(BUFFER_SIZE)
+            data = data.decode()
+            if not data:
+                self.error(FAILED_TO_READ_DATA, "Failed to read request message")
             else:
-                self.error(UNKNOWN_OP, "Unknown operation: " + str(data))
-        self.conn.close()
+                if data[0] == SUGGESTION_OP:
+                    current_round = cartolafc.Api().mercado().rodada_atual
+                    self.suggestion(current_round)
+                elif data[0] == PREVIOUS_SUGG_OP:
+                    try:
+                        round_num = int(data[1:])
+                        self.suggestion(round_num)
+                    except ValueError:
+                        self.error(FAILED_TO_OBTAIN_ROUND, "Failed to obtain a number to identify the previous round "
+                                                           "from: " + str(data))
+                elif data[0] == HELP_OP:
+                    self.help()
+                elif data[0] == CLOSE_CONNECTION:
+                    self.conn.close()
+                    connected = False
+                else:
+                    self.error(UNKNOWN_OP, "Unknown operation: " + str(data))
+
 
 
 def parse_arguments():
@@ -101,7 +110,7 @@ def listen(port):
     while True:
         print("Listening for connections")
         s_listener.listen(BACKLOG)
-        print("Accpeting connection")
+        print("Accepting connection")
         conn, addr = s_listener.accept()
         print("Connected with " + str(addr))
         RequestHandler(conn).start()

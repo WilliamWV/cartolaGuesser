@@ -3,6 +3,7 @@ import argparse
 
 IP = '127.0.0.1'
 BUFFER_SIZE = 1024
+encoder = 'utf-8'
 
 
 def parse_arguments():
@@ -16,15 +17,30 @@ def parse_arguments():
     return args.port
 
 
+def decode_message(message):
+    m = message.decode()
+    status = int(m[0:m.find(',')])
+    m = m[m.find(',') + 1:]
+    print(str(status) + '\n' + m)
+
+
 def requests(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((IP, port))
 
     print("Requesting help message")
-    s.send('H'.encode('ascii'))
-    data = s.recv(BUFFER_SIZE)
-    print(data)
+    s.send('H'.encode(encoder))
+    decode_message(s.recv(BUFFER_SIZE))
 
+    print("Requesting suggestions")
+    s.send('S'.encode(encoder))
+    decode_message(s.recv(BUFFER_SIZE))
+
+    print("Requesting suggestion of previous round")
+    s.send('P34'.encode(encoder))
+    decode_message(s.recv(BUFFER_SIZE))
+
+    s.send('X'.encode(encoder))
 
 if __name__ == '__main__':
     port = parse_arguments()

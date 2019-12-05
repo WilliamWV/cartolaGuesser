@@ -354,7 +354,7 @@ def save_suggestion(team, coach, captain, year, roundNum):
     meis = [get_player(player[0]) for player in team[0]['mei']]
     atas = [get_player(player[0]) for player in team[0]['ata']]
     file.write('Suggestion to round ' + str(roundNum) + ' of ' + str(year) + '\n\n')
-    file.write('Foramation: ' + str(team[2][0] + team[2][1]) + '-' + str(team[2][2]) + '-' + str(team[2][3]) + '\n')
+    file.write('Formation: ' + str(team[2][0] + team[2][1]) + '-' + str(team[2][2]) + '-' + str(team[2][3]) + '\n')
 
     file.write('\nGol: \n')
     for player in gols:
