@@ -49,15 +49,15 @@ class RequestHandler(threading.Thread):
         if round_num in [int(file.replace('.txt', '')) for file in os.listdir(suggestion_dir)]:
             file = open(suggestion_dir + str(round_num) + '.txt')
             message = file.read()
-            self.conn.send(str(OK) + ',' + str(message))
+            self.conn.send((str(OK) + ',' + str(message)).encode('ascii'))
         else:
             self.error(SUGGESTION_NOT_FOUND, "Could not find suggestions to round " + str(round_num))
 
     def help(self):
-        self.conn.send(str(OK) + "," + HELP_MESSAGE)
+        self.conn.send((str(OK) + "," + HELP_MESSAGE).encode('ascii'))
 
     def error(self, code, message):
-        self.conn.send(str(code) + "," + message)
+        self.conn.send((str(code) + "," + message).encode('ascii'))
 
     def run(self):
         data = self.conn.recv(BUFFER_SIZE)
@@ -93,11 +93,15 @@ def parse_arguments():
 
 
 def listen(port):
-    while True:
-        s_listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s_listener.bind((IP, port))
-        s_listener.listen(BACKLOG)
+    print("Initializing socket")
+    s_listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print("Binding to address")
+    s_listener.bind((IP, port))
 
+    while True:
+        print("Listening for connections")
+        s_listener.listen(BACKLOG)
+        print("Accpeting connection")
         conn, addr = s_listener.accept()
         print("Connected with " + str(addr))
         RequestHandler(conn).start()
