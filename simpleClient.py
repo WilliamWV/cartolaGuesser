@@ -42,6 +42,7 @@ def requests(port):
 
     s.send('X'.encode(encoder))
 
+
 if __name__ == '__main__':
     port = parse_arguments()
     requests(port)

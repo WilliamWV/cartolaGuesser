@@ -1,0 +1,30 @@
+Suggestion to round 38 of 2019
+
+Formation: 3-4-3
+
+Gol: 
+	Id = 78584	Nickname = Douglas Friedrich	Team = Bahia
+
+Lat: 
+
+Zag: 
+	Id = 93368	Nickname = Lucas Veríssimo	Team = Santos
+	Id = 52253	Nickname = Réver	Team = Atlético-MG
+	Id = 73421	Nickname = Rafael Vaz	Team = Goiás
+
+Mei: 
+	Id = 81677	Nickname = Carlos Sánchez	Team = Santos
+	Id = 70944	Nickname = Bruno Henrique	Team = Palmeiras
+	Id = 78478	Nickname = Willian Arão	Team = Flamengo
+	Id = 87863	Nickname = Arrascaeta	Team = Flamengo
+
+Ata: 
+	Id = 61188	Nickname = Gilberto	Team = Bahia
+	Id = 83257	Nickname = Gabriel	Team = Flamengo
+	Id = 68920	Nickname = Dudu	Team = Palmeiras
+
+Coach: 
+	Id = 106736	Nickname = Andrey Lopes	Team = Palmeiras
+
+Captain: 
+	Id = 68920	Nickname = Dudu	Team = Palmeiras
