@@ -258,18 +258,6 @@ def round_forecast(attribute_type, year, round_num, attribute, team=None, player
         with the nn_input_value function) and with negative second derivative, allowing more complex and possibly more
         realistic ways to represent the data
 
-        Planned tests:
-            Format: (F, S, R)
-            Initial Tests:
-                (-0.25, 0.04, 5)
-                (-0.1, -0.04, 5)
-                (-0.1, 0, 5)
-                (-0.2, 0, 5)
-                (-0.25, 0.04, 3)
-                (-0.1, -0.04, 3)
-                (-0.1, 0, 3)
-                (-0.2, 0, 3)
-
     """
     R = 5
     F = -0.25
