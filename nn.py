@@ -22,8 +22,8 @@ dataset_abbr = {
 }
 
 EPOCHS = 50
-LOG_DIR = "logs\\fit_saved_-025_004_5\\"
-MODELS_DIR = 'models\\-025_004_5\\'
+LOG_DIR = "logs\\fit_saved_00\\"
+MODELS_DIR = 'models\\00\\'
 INPUT_VALS = 27
 
 
