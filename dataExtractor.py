@@ -366,22 +366,23 @@ def build_line(player, year, curr_round):
     scores[player][year][curr_round] = [0] * (ATTRIBUTES + 1)
 
     for i in range(ATTRIBUTES):
-        #  scores[player][year][curr_round][i] = round_forecast(PLAYER_ATTR, year, curr_round, i, player=player)
-        if log[player][year].get(curr_round-1) is not None and len(log[player][year][curr_round-1]) > 0:
+        scores[player][year][curr_round][i] = round_forecast(PLAYER_ATTR, year, curr_round - 1, i, player=player)
+        '''if log[player][year].get(curr_round-1) is not None and len(log[player][year][curr_round-1]) > 0:
             scores[player][year][curr_round][i] = nn_input_value(
                 scores[player][year][curr_round - 1][i], log[player][year][curr_round-1][i]
             )
         else:
             scores[player][year][curr_round][i] = nn_input_value(scores[player][year][curr_round - 1][i], 0.0)
-
-    #  scores[player][year][curr_round][-1] = round_forecast(PLAYER_ATTR, year, curr_round, -3, player=player)
-
+        '''
+    scores[player][year][curr_round][-1] = round_forecast(PLAYER_ATTR, year, curr_round - 1, -3, player=player)
+    '''
     if log[player][year].get(curr_round-1) is not None and len(log[player][year][curr_round-1]) > 0:
         scores[player][year][curr_round][-1] = nn_input_value(
             scores[player][year][curr_round - 1][-1], log[player][year][curr_round - 1][-3]
         )
     else:
         scores[player][year][curr_round][-1] = nn_input_value(scores[player][year][curr_round - 1][-1], 0.0)
+    '''
 
 
 def process_team_logs():
@@ -400,18 +401,20 @@ def process_team_logs():
                     teams[team][year][round_num]['goals_taken'] = 0.0
                     teams[team][year][round_num]['goals_scored'] = 0.0
                 elif round_num > 2:
-                    #  teams[team][year][round_num]['goals_taken'] = round_forecast(TEAM_ATTR, year, round_num,
-                    #                                                             'goals_taken', team=team)
-                    teams[team][year][round_num]['goals_taken'] = nn_input_value(
+                    teams[team][year][round_num]['goals_taken'] = round_forecast(TEAM_ATTR, year, round_num - 1,
+                                                                              'goals_taken', team=team)
+                    '''teams[team][year][round_num]['goals_taken'] = nn_input_value(
                         teams[team][prev_year[team]][prev_round[team]]['goals_taken'],
                         matches[prev_year[team]][prev_round[team]][team]['goals_taken']
                     )
-                    #  teams[team][year][round_num]['goals_scored'] = round_forecast(TEAM_ATTR, year, round_num,
-                    #                                                              'goals_scored', team=team)
-                    teams[team][year][round_num]['goals_scored'] = nn_input_value(
+                    '''
+                    teams[team][year][round_num]['goals_scored'] = round_forecast(TEAM_ATTR, year, round_num,
+                                                                                 'goals_scored', team=team)
+                    '''teams[team][year][round_num]['goals_scored'] = nn_input_value(
                         teams[team][prev_year[team]][prev_round[team]]['goals_scored'],
                         matches[prev_year[team]][prev_round[team]][team]['goals_scored']
                     )
+                    '''
                 else:
                     teams[team][year][round_num]['goals_taken'] = matches[year][round_num-1][team]['goals_taken']
                     teams[team][year][round_num]['goals_scored'] = matches[year][round_num-1][team]['goals_scored']
