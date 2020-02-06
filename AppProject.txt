@@ -12,6 +12,17 @@ CartolaGuesser Game:
 			101) Conquest system
 			102) The player could be able to consider or not a league round score before it happens in real life, but this decision must not be able to be changed after the market is closed
 	
+	* What the user can do:
+		- Central:
+			* Mount his squad to the round based on Cartola Game
+			* See the current championship against BOTs stats
+			* See the bots squad after the market is closed
+			* See conquest list
+		- Additional:
+			* Synchronize with Cartola's account so that the user squad is automatically updated
+			* Navigate through rounds seeing BOTs and his own score of these rounds
+			* Navigate through rounds to see BOTs teams and his own
+	
 	* Ellaboration:
 	
 		C.3) The palyer will compete in a league like championship against the BOTs
@@ -64,4 +75,10 @@ CartolaGuesser Suggester:
 			- User can choose if he wants only one squad suggestion or receive multiple suggestions
 			- The suggestions must be able to be constrained so that the suggested squad does not overbudget the user
 		
-	
+	* What the user can do:
+		- Central:
+			* Change round budget
+			* See single squad suggestion
+			* See multiple squads suggestion
+		- Additional:
+			* Synchronize with Cartola's account so that the user squad can be changed if he desires and the budget can be updated
