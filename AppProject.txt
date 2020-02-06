@@ -1,8 +1,60 @@
 CartolaGuesser Game:
 
 	* One sentence def: Jogador busca fazer mais pontos do que as escalaçãos dos BOTS
-	* 
-
+	* Features:
+		- Central:
+			1) BOT's squad can only be seen after the closing of the market
+			2) 19 different BOTs are used, the BOTs vary on AI prediction model
+			3) The player will join in a championship against the BOTS where he and the BOTs will form squads throughout the real league and score according to Cartola's score
+			
+		- Additionals:
+			101) Conquest system
+			102) The player could be able to consider or not a league round score before it happens in real life, but this decision must not be able to be changed after the market is closed
+	
+	Ellaboration:
+	
+		C.3) The palyer will compete in a league like championship against the BOTs
+			|		COMPETITOR		|		SCORE		|
+			|	[BOT] fancy balls		|			476		|
+			|	[BOT] zeze				|			469		|
+			|	[Player] cleitin			|			452		|
+			|	[BOT] mad ref			|			450		|
+			|	[BOT] biggus botus	|			447		|
+			|	[BOT] kloppinho		|			431		|
+			|	[BOT] brincation		|			427		|
+			|	[BOT] dale				|			425		|
+			|	[BOT] com. amilton	|			416		|
+			|	[BOT] faustinho		|			407		|
+			|	[BOT] gold balls		|			403		|
+			|	[BOT] neymino			|			399		|
+			|	[BOT] retranca FC	|			371		|
+			|	[BOT] varzinho			|			370		|
+			|	[BOT] pagodera		|			367		|
+			|	[BOT] sinistro			|			366		|
+			|	[BOT] vampeta		|			350		|
+			|	[BOT] raposo			|			341		|
+			|	[BOT] pampakid		|			335		|
+			|	[BOT] barcelona		|			323		|
+		
+		A.101) Conquests:
+			
+			Conquests rewards:
+				* EASY: 10 xp
+				* MID: 50 xp
+				* HARD: 300xp
+			
+			Conquest list:
+				* MVP: Be the top scorer of one round - MID (amoung the BOTS) : Every round
+				* LVP: Be the bottom scorer of one round - MID (amoung the BOTS) : Every round
+				* CAMPEÃO: Be the top scorer of the entire championship - HARD (amoung the BOTS) : Once the league
+				* OK: Beat the average of Cartola's scores in one round - EASY : Every round
+				* MITO HOJE: Have the top scorer football player on your squad in one round- EASY : Every round
+				* MITO SEMPRE: Have the top scorer football player on your squad in at least half of the championship rounds - MID : Once the league
+				* RETRANCA: Have none of your defenders suffering a goal in one round - EASY : Every round
+				* JOGAMOS COMO NUNCA PERDEMOS COMO SEMPRE: beat your own score of a round but still don't be the MVP of the round - MID : Every round
+				* PEDE MÚSICA: Have one of your players scoring at least three goals on the same match - MID : Every round
+				* 7x1: Have your players scoring a total of 7 goals and taking a total of 1 goal - MID: Every round
+	
 CartolaGuesser Suggester:
 
 	* One sentence def: Sugestões de escalações do Cartola por BOTS
