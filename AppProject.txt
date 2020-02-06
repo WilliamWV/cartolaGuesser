@@ -1,6 +1,7 @@
 CartolaGuesser Game:
 
-	* One sentence def: Jogador busca fazer mais pontos do que as escalaçãos dos BOTS
+	* One sentence def: Player's squad must beat BOTS squad throught the real league on Cartola
+	
 	* Features:
 		- Central:
 			1) BOT's squad can only be seen after the closing of the market
@@ -11,7 +12,7 @@ CartolaGuesser Game:
 			101) Conquest system
 			102) The player could be able to consider or not a league round score before it happens in real life, but this decision must not be able to be changed after the market is closed
 	
-	Ellaboration:
+	* Ellaboration:
 	
 		C.3) The palyer will compete in a league like championship against the BOTs
 			|		COMPETITOR		|		SCORE		|
@@ -57,4 +58,10 @@ CartolaGuesser Game:
 	
 CartolaGuesser Suggester:
 
-	* One sentence def: Sugestões de escalações do Cartola por BOTS
+	* One sentence def: Cartola squad suggestions -> utilitary app
+	* Features:
+		* Central:
+			- User can choose if he wants only one squad suggestion or receive multiple suggestions
+			- The suggestions must be able to be constrained so that the suggested squad does not overbudget the user
+		
+	
