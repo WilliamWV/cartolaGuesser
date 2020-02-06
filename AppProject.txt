@@ -1,0 +1,8 @@
+CartolaGuesser Game:
+
+	* One sentence def: Jogador busca fazer mais pontos do que as escalaçãos dos BOTS
+	* 
+
+CartolaGuesser Suggester:
+
+	* One sentence def: Sugestões de escalações do Cartola por BOTS
